@@ -1,20 +1,68 @@
 اجد صعوبة في الكتابه باللغة الانجليزية، على كل حال سينحصر استعمال الذكاء الاصطناعي في هذي الملفات التالية فقط
 /README.md
 /software/assembler/assembler.cpp
+/Makefile
 
-# 32-Bit Custom Processor Architecture
+# 16-Bit Custom Processor Architecture
 
-A custom 32-bit RISC-like processor designed in Logisim Evolution, featured with a custom 52-instruction Turing-complete Instruction Set Architecture (ISA), modular hardware components, and a custom C++ assembler toolchain.
+A custom 16-bit RISC-like processor designed in **Logisim Evolution**, featuring a modular hardware architecture, dedicated boot logic, hardware status flags, and an extensible custom C++ toolchain.
 
 ---
 
-## 📌 Key Architectural Features
+## 🏗️ Hardware Implementation & Development Status
 
-- **Architecture:** 32-bit Datapath and Instruction Word
-- **Instruction Set:** 52 Instructions (Arithmetic, Logic, Memory I/O, Control Flow, and Stack Operations)
-- **ALU & Flags:** Supports Status Flags — `Z` (Zero), `C` (Carry), `S` (Sign), and `O` (Overflow)
-- **Simulation Engine:** Logisim Evolution
-- **Toolchain:** Custom C++17 Assembler with automated `Makefile` build system
+### 1. Hardware Components
+
+- [x] **General-Purpose Registers & Register File:** Fully implemented.
+- [x] **Memory System:** ROM Boot module and RAM integration completed.
+- [🔄] **Control Unit:** Core decoder and main control logic implemented; remaining instruction signals in active development.
+- [🔄] **ALU Status Flags:** Flag logic under development (`Z` - Zero, `S` - Sign, `C` - Carry, `O` - Overflow).
+
+### 2. Software Toolchain
+
+- [🔄] **Custom C++ Assembler (`assembler.cpp`):** Functional base pipeline under active development to translate assembly mnemonics into Logisim-compatible memory files (`.hex`).
+
+---
+
+## ⚙️ Key Architectural Features
+
+- **Datapath & Word Size:** 16-bit Data and Instruction Word
+- **Execution Units:** Dedicated Data Movement, Arithmetic, Logic, Stack, and Control Flow execution paths
+- **Status Flags:** `Z` (Zero), `S` (Sign), `C` (Carry), `O` (Overflow)
+- **Simulation Platform:** Logisim Evolution
+- **Software Pipeline:** Custom C++17 Assembler with `Makefile` automation
+
+---
+
+## 📜 Instruction Set Architecture (ISA)
+
+Below is the planned instruction set derived from the decoder architecture. Instructions marked with **`[✓]`** are fully implemented in hardware.
+
+### 🟢 Implemented Instructions (`11/50+`)
+
+| Category          | Instruction  | Description                                         |
+| :---------------- | :----------- | :-------------------------------------------------- |
+| **System**        | `BOOT` `[✓]` | Initializes execution pipeline from ROM Boot memory |
+| **Memory / Data** | `LOAD` `[✓]` | Load value from memory to register                  |
+|                   | `STOR` `[✓]` | Store value from register to memory                 |
+|                   | `MOV` `[✓]`  | Move value between registers                        |
+|                   | `MOVI` `[✓]` | Move immediate value into register                  |
+| **Arithmetic**    | `ADD` `[✓]`  | Add values of two registers                         |
+|                   | `ADDI` `[✓]` | Add immediate value to register                     |
+|                   | `ADDM` `[✓]` | Add memory content directly to register             |
+|                   | `SUB` `[✓]`  | Subtract register value from another                |
+|                   | `SUBI` `[✓]` | Subtract immediate value from register              |
+|                   | `SUBM` `[✓]` | Subtract memory content from register               |
+
+---
+
+### 🟡 Planned & In-Maintenance Instructions
+
+- **System & Stack:** `NOP`, `PUSH`, `POP`, `XCHG`, `INN`, `OUTT`, `CLR`, `HALT`
+- **Arithmetic & Extension:** `MUL`, `DIV`, `INC`, `DEC`
+- **Logic & Bitwise:** `ANDD`, `ANDI`, `ORR`, `ORI`, `XORR`, `XORI`, `NOTT`, `SHL`, `SHR`, `ROLL`, `RORR`
+- **Comparisons & Flags:** `CMP`, `CMPI`, `TEST`, `CLC`, `STC`
+- **Control Flow & Branching:** `JMP`, `JZ` (`JE`), `JNZ` (`JNE`), `JC`, `JNC`, `JS`, `JNS`, `JA` (`JG`), `REF` (`JL`), `JAE`, `JBE`, `CALL`, `RET`
 
 ---
 
@@ -22,50 +70,46 @@ A custom 32-bit RISC-like processor designed in Logisim Evolution, featured with
 
     .
     ├── docs/
-    │   └── opcode.md                  # Detailed 52-Instruction ISA Specification & Hex Encoding
+    │   └── opcode.md                  # Detailed ISA Specification & Opcode Encodings
     ├── hardware/
-    │   └── cpu_32bit.circ             # Processor Circuit & Subcircuits (Logisim Evolution)
+    │   └── cpu_16bit.circ             # 16-bit Processor Architecture (Logisim Evolution)
     ├── software/
     │   └── assembler/
-    │       └── assembler.cpp          # C++17 Assembler Source Code
+    │       └── assembler.cpp          # Custom C++17 Assembler Source Code
     ├── programs/
-    │   ├── program.asm                # Assembly Source Code
-    │   └── memory.hex                 # Generated Hex Output for Logisim RAM
-    ├── Makefile                       # Automated Build Script
+    │   ├── program.asm                # Assembly Test Program
+    │   └── memory.hex                 # Compiled Hex Output for Logisim RAM
+    ├── Makefile                       # Automated Build System
     ├── .gitignore                     # Git Exclusion Rules
     └── README.md                      # Project Overview
 
 ---
 
-## 🛠️ Software Toolchain & Building
+## 🛠️ Software Toolchain & Build Guide
 
 ### Prerequisites
 
-- **C++ Compiler:** `g++` with C++17 support
-- **Build Tool:** `make`
-- **Simulator:** Logisim Evolution
+- **C++ Compiler:** `g++` (C++17 or higher)
+- **Build Automation:** `make`
+- **Logic Simulator:** Logisim Evolution
 
-### Build Commands
+### Compilation Commands
 
-- **Compile Assembler & Generate Hex File:**
-  `make`
+Build the assembler and generate the memory file:
 
-- **Clean Build Artifacts:**
-  `make clean`
+    make
+
+Clean build outputs:
+
+    make clean
 
 ---
 
 ## 🚀 Execution & Simulation Workflow
 
-1. **Write Code:** Edit or add Assembly code inside `programs/program.asm`.
-2. **Assemble:** Run `make` to compile the C++ assembler and generate the `programs/memory.hex` file.
-3. **Simulate:**
-    - Open `hardware/cpu_32bit.circ` inside **Logisim Evolution**.
-    - Right-click the **RAM Module** -> Select **Load Image**.
-    - Choose `programs/memory.hex` and start the clock generator.
-
----
-
-## 📖 ISA Documentation
-
-For complete opcode mappings, register layouts, and control signal specifications, refer to `docs/opcode.md`.
+1. **Write Assembly:** Write target instructions inside `programs/program.asm`.
+2. **Compile:** Run `make` to invoke the C++ assembler and output `programs/memory.hex`.
+3. **Load Image:**
+    - Open `hardware/cpu_16bit.circ` in **Logisim Evolution**.
+    - Right-click the **RAM / ROM Module** -> **Load Image**.
+    - Select `programs/memory.hex` and start the clock oscillator.
