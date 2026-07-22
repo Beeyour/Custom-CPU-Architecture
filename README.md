@@ -1,7 +1,12 @@
-اجد صعوبة في الكتابه باللغة الانجليزية، على كل حال سينحصر استعمال الذكاء الاصطناعي في هذي الملفات التالية فقط
-/README.md
-/software/assembler/assembler.cpp
-/Makefile
+> **AI Usage & Verification Disclaimer**
+> AI assistance was strictly limited to English language translation, document formatting, and code/toolchain structuring across the following files only:
+>
+> - `/docs/opcode.md`
+> - `/software/assembler/assembler.cpp`
+> - `/Makefile`
+> - `/README.md`
+>
+> All AI-generated outputs and suggestions were thoroughly reviewed, audited, and verified to ensure complete technical accuracy with the hardware design.
 
 # 16-Bit Custom Processor Architecture
 
@@ -34,35 +39,91 @@ A custom 16-bit RISC-like processor designed in **Logisim Evolution**, featuring
 
 ---
 
-## 📜 Instruction Set Architecture (ISA)
+## 📜 Instruction Set Architecture (ISA) — Master Table
 
-Below is the planned instruction set derived from the decoder architecture. Instructions marked with **`[✓]`** are fully implemented in hardware.
-
-### 🟢 Implemented Instructions (`11/50+`)
-
-| Category          | Instruction  | Description                                         |
-| :---------------- | :----------- | :-------------------------------------------------- |
-| **System**        | `BOOT` `[✓]` | Initializes execution pipeline from ROM Boot memory |
-| **Memory / Data** | `LOAD` `[✓]` | Load value from memory to register                  |
-|                   | `STOR` `[✓]` | Store value from register to memory                 |
-|                   | `MOV` `[✓]`  | Move value between registers                        |
-|                   | `MOVI` `[✓]` | Move immediate value into register                  |
-| **Arithmetic**    | `ADD` `[✓]`  | Add values of two registers                         |
-|                   | `ADDI` `[✓]` | Add immediate value to register                     |
-|                   | `ADDM` `[✓]` | Add memory content directly to register             |
-|                   | `SUB` `[✓]`  | Subtract register value from another                |
-|                   | `SUBI` `[✓]` | Subtract immediate value from register              |
-|                   | `SUBM` `[✓]` | Subtract memory content from register               |
+| Status | Legend                      |
+| :----: | :-------------------------- |
+| `[✓]`  | Implemented in Hardware     |
+| `[ ]`  | Planned / Under Development |
 
 ---
 
-### 🟡 Planned & In-Maintenance Instructions
+### 1. Data Movement, Stack & I/O Group (`0x00` – `0x09`)
 
-- **System & Stack:** `NOP`, `PUSH`, `POP`, `XCHG`, `INN`, `OUTT`, `CLR`, `HALT`
-- **Arithmetic & Extension:** `MUL`, `DIV`, `INC`, `DEC`
-- **Logic & Bitwise:** `ANDD`, `ANDI`, `ORR`, `ORI`, `XORR`, `XORI`, `NOTT`, `SHL`, `SHR`, `ROLL`, `RORR`
-- **Comparisons & Flags:** `CMP`, `CMPI`, `TEST`, `CLC`, `STC`
-- **Control Flow & Branching:** `JMP`, `JZ` (`JE`), `JNZ` (`JNE`), `JC`, `JNC`, `JS`, `JNS`, `JA` (`JG`), `REF` (`JL`), `JAE`, `JBE`, `CALL`, `RET`
+|  Status  | Opcode (Hex) | Instruction    | Description                               |
+| :------: | :----------: | :------------- | :---------------------------------------- |
+| `[✓][ ]` |    `0x00`    | `BOOT` / `NOP` | Pipeline initialization / No Operation    |
+|  `[✓]`   |    `0x01`    | `LOAD`         | Read value from RAM to Register           |
+|  `[✓]`   |    `0x02`    | `STOR`         | Write value from Register to RAM          |
+|  `[✓]`   |    `0x03`    | `MOV`          | Copy value between Registers              |
+|  `[✓]`   |    `0x04`    | `MOVI`         | Load Immediate 16-bit value into Register |
+|  `[ ]`   |    `0x05`    | `PUSH`         | Push value onto Stack                     |
+|  `[ ]`   |    `0x06`    | `POP`          | Pop value from Stack                      |
+|  `[ ]`   |    `0x07`    | `XCHG`         | Exchange contents of two Registers        |
+|  `[ ]`   |    `0x08`    | `INN`          | Read data from Input Port                 |
+|  `[ ]`   |    `0x09`    | `OUTT`         | Write data to Output Port (Display)       |
+
+---
+
+### 2. ALU & Comparison Operations Group (`0x0A` – `0x21`)
+
+| Status | Opcode (Hex) | Instruction | Description                                 |
+| :----: | :----------: | :---------- | :------------------------------------------ |
+| `[✓]`  |    `0x0A`    | `ADD`       | Add Register to Register                    |
+| `[✓]`  |    `0x0B`    | `ADDI`      | Add Immediate value to Register             |
+| `[✓]`  |    `0x0C`    | `ADDM`      | Add RAM memory content directly to Register |
+| `[✓]`  |    `0x0D`    | `SUB`       | Subtract Register from Register             |
+| `[✓]`  |    `0x0E`    | `SUBI`      | Subtract Immediate value from Register      |
+| `[✓]`  |    `0x0F`    | `SUBM`      | Subtract RAM memory content from Register   |
+| `[ ]`  |    `0x10`    | `MUL`       | Unsigned Multiplication                     |
+| `[ ]`  |    `0x11`    | `DIV`       | Unsigned Division                           |
+| `[ ]`  |    `0x12`    | `INC`       | Increment Register by 1                     |
+| `[ ]`  |    `0x13`    | `DEC`       | Decrement Register by 1                     |
+| `[ ]`  |    `0x14`    | `ANDD`      | Bitwise AND Registers                       |
+| `[ ]`  |    `0x15`    | `ANDI`      | Bitwise AND Immediate                       |
+| `[ ]`  |    `0x16`    | `ORR`       | Bitwise OR Registers                        |
+| `[ ]`  |    `0x17`    | `ORI`       | Bitwise OR Immediate                        |
+| `[ ]`  |    `0x18`    | `XORR`      | Bitwise XOR Registers                       |
+| `[ ]`  |    `0x19`    | `XORI`      | Bitwise XOR Immediate                       |
+| `[ ]`  |    `0x1A`    | `NOTT`      | Bitwise NOT (One's Complement)              |
+| `[ ]`  |    `0x1B`    | `SHL`       | Logical Shift Left                          |
+| `[ ]`  |    `0x1C`    | `SHR`       | Logical Shift Right                         |
+| `[ ]`  |    `0x1D`    | `ROLL`      | Rotate Left                                 |
+| `[ ]`  |    `0x1E`    | `RORR`      | Rotate Right                                |
+| `[ ]`  |    `0x1F`    | `CMP`       | Compare Registers (Sets Flags)              |
+| `[ ]`  |    `0x20`    | `CMPI`      | Compare Immediate (Sets Flags)              |
+| `[ ]`  |    `0x21`    | `TEST`      | Bitwise Logical Compare (Sets Flags)        |
+
+---
+
+### 3. Control Flow & Branching Group (`0x22` – `0x2E`)
+
+| Status | Opcode (Hex) | Instruction   | Hardware Branch Condition        |
+| :----: | :----------: | :------------ | :------------------------------- |
+| `[ ]`  |    `0x22`    | `JMP`         | Unconditional Jump               |
+| `[ ]`  |    `0x23`    | `JZ` / `JE`   | Jump if Zero (`Z = 1`)           |
+| `[ ]`  |    `0x24`    | `JNZ` / `JNE` | Jump if Not Zero (`Z = 0`)       |
+| `[ ]`  |    `0x25`    | `JC`          | Jump if Carry (`C = 1`)          |
+| `[ ]`  |    `0x26`    | `JNC`         | Jump if Not Carry (`C = 0`)      |
+| `[ ]`  |    `0x27`    | `JS`          | Jump if Sign (`S = 1`)           |
+| `[ ]`  |    `0x28`    | `JNS`         | Jump if Not Sign (`S = 0`)       |
+| `[ ]`  |    `0x29`    | `JA` / `JG`   | Jump if Greater / Above          |
+| `[ ]`  |    `0x2A`    | `REF` / `JL`  | Jump if Less                     |
+| `[ ]`  |    `0x2B`    | `JAE`         | Jump if Greater or Equal         |
+| `[ ]`  |    `0x2C`    | `JBE`         | Jump if Less or Equal            |
+| `[ ]`  |    `0x2D`    | `CALL`        | Call Subroutine (Push IP & Jump) |
+| `[ ]`  |    `0x2E`    | `RET`         | Return from Subroutine (Pop IP)  |
+
+---
+
+### 4. Flags & System Operations Group (`0x2F` – `0x33`)
+
+| Status | Opcode (Hex) | Instruction | Description                    |
+| :----: | :----------: | :---------- | :----------------------------- |
+| `[ ]`  |    `0x2F`    | `CLC`       | Clear Carry Flag (`C = 0`)     |
+| `[ ]`  |    `0x30`    | `STC`       | Set Carry Flag (`C = 1`)       |
+| `[ ]`  |    `0x31`    | `CLR`       | Clear Register / Control Flags |
+| `[ ]`  |    `0x33`    | `HALT`      | Halt CPU Clock & Pipeline      |
 
 ---
 

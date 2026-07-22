@@ -1,130 +1,205 @@
-# C0 _ROM_
+# 16-Bit Processor Instruction Set & Control Signal Specification
 
-# C1, C2, C3 _RAM_
+This document details the hardware control signals, register bit encodings, and binary word layouts for the 16-bit custom processor architecture.
 
-# C4 _IR_
+---
 
-# C5 _Counter_
+## 🎛️ 1. Control Signal Line Mappings (C0 – C63)
 
-# C6, C7, C8 _IP_
+The Control Unit outputs a 64-bit control line array (`C0` to `C63`) to orchestrate data movement across internal buses during execution steps.
 
-# C9, C10 _MAR_
+| Control Line Range | Target Module / Function | Description                                             |
+| :----------------- | :----------------------- | :------------------------------------------------------ |
+| **`C0`**           | **ROM**                  | Enable / Control Boot ROM Output                        |
+| **`C1` – `C3`**    | **RAM**                  | Read, Write, and Memory Enable signals                  |
+| **`C4`**           | **IR**                   | Instruction Register Load signal                        |
+| **`C5`**           | **Step Counter**         | Instruction Cycle Counter Reset / Step Control          |
+| **`C6` – `C8`**    | **IP (PC)**              | Instruction Pointer Increment, Load, and Enable signals |
+| **`C9` – `C10`**   | **MAR**                  | Memory Address Register Control                         |
+| **`C11`**          | **FLAGS**                | Update Status Flags (`Z`, `S`, `C`, `O`)                |
+| **`C12`**          | _Reserved_               | Unassigned / Expansion Pin                              |
+| **`C13` – `C15`**  | **High Registers**       | Bus Control for High-byte / Primary Registers           |
+| **`C16` – `C18`**  | **Low Registers**        | Bus Control for Low-byte / Secondary Registers          |
+| **`C19` – `C31`**  | _Reserved_               | Unassigned Control Lines                                |
+| **`C32` – `C35`**  | **ALU Select**           | 4-bit ALU Function Code Selector                        |
+| **`C36` – `C55`**  | _Reserved_               | Unassigned Control Lines                                |
+| **`C56` – `C59`**  | **Select High Register** | Target High Register Selection (Destination - 4 Bits)   |
+| **`C60` – `C63`**  | **Select Low Register**  | Target Low Register Selection (Source - 4 Bits)         |
 
-# C11 _FLAGS_
+---
 
-$ C12 $
+## 🗄️ 2. Register Encodings (4-Bit Register ID)
 
-# C13,C14, C15 _For High Registers_
+General-purpose and special registers are encoded using a 4-bit field inside instruction words:
 
-# C16, C17, C18 _For Low Registers_
+| Binary Code | Register Name | Role / Description   |
+| :---------: | :-----------: | :------------------- |
+|   `0000`    |   **`AX`**    | Accumulator Register |
+|   `0001`    |   **`BX`**    | Base Register        |
+|   `0010`    |   **`CX`**    | Counter Register     |
+|   `0011`    |   **`DX`**    | Data Register        |
+|   `0100`    |   **`BP`**    | Base Pointer         |
+|   `0101`    |   **`DI`**    | Destination Index    |
+|   `0110`    |   **`SI`**    | Source Index         |
+|   `0111`    |   **`SP`**    | Stack Pointer        |
+|   `1111`    |  **`FLAG`**   | Flags Register       |
 
-$C19_C31$
+---
 
-# C32, C33, C34, C35 _Select ALU_
+## 🏗️ 3. Instruction Word Layout (16-Bit Datapath)
 
-$C36_C55$
+Every instruction word consists of exactly 16 bits, structured as follows:
 
-# C56, C57, C58, C59 _Select High Register_
+    [ Bits 15-14 ]  [ Bits 13-10 ]  [ Bits 9-6 ]   [ Bits 5-0 ]
+       Reserved        SRC Field     DST Field     Opcode Field
+       (2 bits)        (4 bits)       (4 bits)       (6 bits)
 
-# C60, C61, C62, C63 _Select High Register_
+- Total Word Size: 2 + 4 + 4 + 6 = **16 Bits**
+- Unused fields in single-operand or zero-operand instructions default to `xxxx` (`0000`).
 
-$
+---
 
-% BOOT_0
+## 📜 4. Implemented Instruction Encodings & Bit Patterns
 
-xxxx xxxx xx00 0000
+### 1. `BOOT` — System Initialization
 
-% LOAD_1 (LOAD FROM SPECIFIC ADDRESS)
-xxxx xxxx xx00 0001
+Initializes processing pipeline from Boot ROM memory.
 
-xxxx xx00 00 To AX
-xxxx xx00 01 To BX
-xxxx xx00 10 To CX
-xxxx xx00 11 To DX
+    Binary Pattern: [ xx xxxx xxxx 000000 ]
+    Opcode: 0x00 (0b000000)
 
-% STOR_2 (STORE TO SPECIFIC ADDRESS)
-xxxx xxxx xx00 0010
+---
 
-xx00 00 From AX
-xx00 01 From BX
-xx00 10 From CX
-xx00 11 From DX
+### 2. `LOAD` — Load Register from Memory
 
-% MOV_3 (MOV FROM RIGSTER TO RIGSTER)
-xxxx xxxx xx00 0011
+Reads data from RAM memory address into target destination register (`DST`).
 
-xxxx xx00 00 To AX
-xxxx xx00 01 To BX
-xxxx xx00 10 To CX
-xxxx xx00 11 To DX
+    Binary Pattern: [ xx xxxx [DST] 000001 ]
+    Opcode: 0x01 (0b000001)
 
-xx00 00 From AX
-xx00 01 From BX
-xx00 10 From CX
-xx00 11 From DX
+    [DST] Field (4 Bits):
+      0000 -> AX    0100 -> BP
+      0001 -> BX    0101 -> DI
+      0010 -> CX    0110 -> SI
+      0011 -> DX    0111 -> SP
+                    1111 -> FLAG
 
-% MOVI_4 (MOV NEXT NUMBER IMMEDTE TO RIGSTER)
-xxxx xxxx xx00 0100
+---
 
-xxxx xx00 00 To AX
-xxxx xx00 01 To BX
-xxxx xx00 10 To CX
-xxxx xx00 11 To DX
+### 3. `STOR` — Store Register to Memory
 
-% ADD_5 (ADD RIGSTER TO RIGSTER)
-xxxx xxxx xx00 0101
+Writes contents of source register (`SRC`) into RAM memory.
 
-xxxx xx00 00 To AX
-xxxx xx00 01 To BX
-xxxx xx00 10 To CX
-xxxx xx00 11 To DX
+    Binary Pattern: [ xx [SRC] xxxx 000010 ]
+    Opcode: 0x02 (0b000010)
 
-xx00 00 From AX
-xx00 01 From BX
-xx00 10 From CX
-xx00 11 From DX
+    [SRC] Field (4 Bits):
+      0000 -> AX    0100 -> BP
+      0001 -> BX    0101 -> DI
+      0010 -> CX    0110 -> SI
+      0011 -> DX    0111 -> SP
+                    1111 -> FLAG
 
-% ADDI_6 (ADD NEXT NUMBER IMMEDTE TO RIGSTER)
-xxxx xxxx xx00 0110
+---
 
-xxxx xx00 00 To AX
-xxxx xx00 10 To CX
-xxxx xx00 01 To BX
-xxxx xx00 11 To DX
+### 4. `MOV` — Register to Register Transfer
 
-% ADDM_7 (ADD FROM SPECIFIC ADDRESS TO RIGSTER)
-xxxx xxxx xx00 0111
+Copies content from source register (`SRC`) to destination register (`DST`).
 
-xxxx xx00 00 To AX
-xxxx xx00 10 To CX
-xxxx xx00 01 To BX
-xxxx xx00 11 To DX
+    Binary Pattern: [ xx [SRC] [DST] 000011 ]
+    Opcode: 0x03 (0b000011)
 
-% SUB_8 (SUB RIGSTER TO RIGSTER)
-xxxx xxxx xx00 1000
+    [DST] Target Field (4 Bits) | [SRC] Source Field (4 Bits):
+      0000 -> AX                  0000 -> AX
+      0001 -> BX                  0001 -> BX
+      0010 -> CX                  0010 -> CX
+      0011 -> DX                  0011 -> DX
+      0100 -> BP                  0100 -> BP
+      0101 -> DI                  0101 -> DI
+      0110 -> SI                  0110 -> SI
+      0111 -> SP                  0111 -> SP
+      1111 -> FLAG                1111 -> FLAG
 
-xxxx xx00 00 To AX
-xxxx xx00 01 To BX
-xxxx xx00 10 To CX
-xxxx xx00 11 To DX
+---
 
-xx00 00 From AX
-xx00 01 From BX
-xx00 10 From CX
-xx00 11 From DX
+### 5. `MOVI` — Move Immediate Value
 
-% SUBI_9 (SUB NEXT NUMBER IMMEDTE TO RIGSTER)
-xxxx xxxx xx00 1001
+Loads next 16-bit immediate word directly into target destination register (`DST`).
 
-xxxx xx00 00 To AX
-xxxx xx00 10 To CX
-xxxx xx00 01 To BX
-xxxx xx00 11 To DX
+    Binary Pattern: [ xx xxxx [DST] 000100 ]
+    Opcode: 0x04 (0b000100)
 
-% SUBM_10 (SUB FROM SPECIFIC ADDRESS TO RIGSTER)
-xxxx xxxx xx00 1010
+    [DST] Field (4 Bits):
+      (Same 4-bit Register Encodings)
 
-xxxx xx00 00 To AX
-xxxx xx00 10 To CX
-xxxx xx00 01 To BX
-xxxx xx00 11 To DX
+---
+
+### 6. `ADD` — Register-to-Register Addition
+
+Adds source register value to destination register (`DST <- DST + SRC`).
+
+    Binary Pattern: [ xx [SRC] [DST] 000101 ]
+    Opcode: 0x05 (0b000101)
+
+    [DST] Target Field (4 Bits) | [SRC] Source Field (4 Bits):
+      (Same 4-bit Register Encodings)
+
+---
+
+### 7. `ADDI` — Immediate Addition
+
+Adds immediate word value directly to destination register (`DST <- DST + IMM`).
+
+    Binary Pattern: [ xx xxxx [DST] 000110 ]
+    Opcode: 0x06 (0b000110)
+
+    [DST] Field (4 Bits):
+      (Same 4-bit Register Encodings)
+
+---
+
+### 8. `ADDM` — Memory Direct Addition
+
+Adds value at RAM memory location directly to destination register (`DST <- DST + RAM[ADDR]`).
+
+    Binary Pattern: [ xx xxxx [DST] 000111 ]
+    Opcode: 0x07 (0b000111)
+
+    [DST] Field (4 Bits):
+      (Same 4-bit Register Encodings)
+
+---
+
+### 9. `SUB` — Register-to-Register Subtraction
+
+Subtracts source register value from destination register (`DST <- DST - SRC`).
+
+    Binary Pattern: [ xx [SRC] [DST] 001000 ]
+    Opcode: 0x08 (0b001000)
+
+    [DST] Target Field (4 Bits) | [SRC] Source Field (4 Bits):
+      (Same 4-bit Register Encodings)
+
+---
+
+### 10. `SUBI` — Immediate Subtraction
+
+Subtracts immediate word value from destination register (`DST <- DST - IMM`).
+
+    Binary Pattern: [ xx xxxx [DST] 001001 ]
+    Opcode: 0x09 (0b001001)
+
+    [DST] Field (4 Bits):
+      (Same 4-bit Register Encodings)
+
+---
+
+### 11. `SUBM` — Memory Direct Subtraction
+
+Subtracts value at RAM memory location directly from destination register (`DST <- DST - RAM[ADDR]`).
+
+    Binary Pattern: [ xx xxxx [DST] 001010 ]
+    Opcode: 0x0A (0b001010)
+
+    [DST] Field (4 Bits):
+      (Same 4-bit Register Encodings)
