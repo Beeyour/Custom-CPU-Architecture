@@ -21,7 +21,10 @@ A custom 16-bit RISC-like processor designed in **Logisim Evolution**, featuring
 - [x] **General-Purpose Registers & Register File:** Fully implemented.
 - [x] **Memory System:** ROM Boot module and RAM integration completed.
 - [🔄] **Control Unit:** Core decoder and main control logic implemented; remaining instruction signals in active development.
-- [🔄] **ALU Status Flags:** Flag logic under development (`Z` - Zero, `S` - Sign, `C` - Carry, `O` - Overflow).
+- [🔄] **ALU Status Flags:**
+    - [x] **Zero Flag (`Z`) & Sign Flag (`S`):** Fully implemented.
+    - [🔄] **Carry Flag (`C`):** Base architecture established; near completion.
+    - [ ] **Overflow Flag (`O`):** Implementation method pending adoption.
 
 ### 2. Software Toolchain
 
