@@ -15,7 +15,6 @@ $(BIN): $(SRC)
 	@mkdir -p bin
 	$(CXX) $(CXXFLAGS) $(SRC) -o $(BIN)
 
-
 $(HEX): $(BIN) $(ASM)
 	./$(BIN) $(ASM) -o $(HEX)
 
