@@ -20,11 +20,14 @@ A custom 16-bit RISC-like processor designed in **Logisim Evolution**, featuring
 
 - [x] **General-Purpose Registers & Register File:** Fully implemented.
 - [x] **Memory System:** ROM Boot module and RAM integration completed.
-- [🔄] **Control Unit:** Core decoder and main control logic implemented; remaining instruction signals in active development.
+- [x] **ALU Core & Datapath Execution Units:** All Arithmetic, Logical, Shift, Rotate, and Comparison execution paths completed.
 - [x] **ALU Status Flags:**
-    - [x] **Zero Flag (`Z`) & Sign Flag (`S`):** Fully implemented.
+    - [x] **Zero Flag (`Z`):** Fully implemented.
+    - [x] **Sign Flag (`S`):** Fully implemented.
     - [x] **Carry Flag (`C`):** Fully implemented.
     - [x] **Overflow Flag (`O`):** Fully implemented.
+- [🔄] **Control Unit & Micro-Operations:** Core opcode decoder established; micro-operation sequencing and control signals across execution units in active development.
+- [ ] **Control Flow & System Operations Unit:** Branching logic, hardware `LOOP`, subroutine call/return stack, and system control circuitry pending implementation.
 
 ### 2. Software Toolchain
 
@@ -60,11 +63,11 @@ A custom 16-bit RISC-like processor designed in **Logisim Evolution**, featuring
 |  `[✓]`   |    `0x02`    | `STOR`         | Write value from Register to RAM          |
 |  `[✓]`   |    `0x03`    | `MOV`          | Copy value between Registers              |
 |  `[✓]`   |    `0x04`    | `MOVI`         | Load Immediate 16-bit value into Register |
-|  `[ ]`   |    `0x05`    | `PUSH`         | Push value onto Stack                     |
-|  `[ ]`   |    `0x06`    | `POP`          | Pop value from Stack                      |
-|  `[ ]`   |    `0x07`    | `XCHG`         | Exchange contents of two Registers        |
-|  `[ ]`   |    `0x08`    | `INN`          | Read data from Input Port                 |
-|  `[ ]`   |    `0x09`    | `OUTT`         | Write data to Output Port (Display)       |
+|  `[✓]`   |    `0x05`    | `PUSH`         | Push value onto Stack                     |
+|  `[✓]`   |    `0x06`    | `POP`          | Pop value from Stack                      |
+|  `[✓]`   |    `0x07`    | `XCHG`         | Exchange contents of two Registers        |
+|  `[✓]`   |    `0x08`    | `INN`          | Read data from Input Port                 |
+|  `[✓]`   |    `0x09`    | `OUTT`         | Write data to Output Port (Display)       |
 
 ---
 
@@ -78,54 +81,55 @@ A custom 16-bit RISC-like processor designed in **Logisim Evolution**, featuring
 | `[✓]`  |    `0x0D`    | `SUB`       | Subtract Register from Register             |
 | `[✓]`  |    `0x0E`    | `SUBI`      | Subtract Immediate value from Register      |
 | `[✓]`  |    `0x0F`    | `SUBM`      | Subtract RAM memory content from Register   |
-| `[ ]`  |    `0x10`    | `MUL`       | Unsigned Multiplication                     |
-| `[ ]`  |    `0x11`    | `DIV`       | Unsigned Division                           |
-| `[ ]`  |    `0x12`    | `INC`       | Increment Register by 1                     |
-| `[ ]`  |    `0x13`    | `DEC`       | Decrement Register by 1                     |
-| `[ ]`  |    `0x14`    | `ANDD`      | Bitwise AND Registers                       |
-| `[ ]`  |    `0x15`    | `ANDI`      | Bitwise AND Immediate                       |
-| `[ ]`  |    `0x16`    | `ORR`       | Bitwise OR Registers                        |
-| `[ ]`  |    `0x17`    | `ORI`       | Bitwise OR Immediate                        |
-| `[ ]`  |    `0x18`    | `XORR`      | Bitwise XOR Registers                       |
-| `[ ]`  |    `0x19`    | `XORI`      | Bitwise XOR Immediate                       |
-| `[ ]`  |    `0x1A`    | `NOTT`      | Bitwise NOT (One's Complement)              |
-| `[ ]`  |    `0x1B`    | `SHL`       | Logical Shift Left                          |
-| `[ ]`  |    `0x1C`    | `SHR`       | Logical Shift Right                         |
-| `[ ]`  |    `0x1D`    | `ROLL`      | Rotate Left                                 |
-| `[ ]`  |    `0x1E`    | `RORR`      | Rotate Right                                |
-| `[ ]`  |    `0x1F`    | `CMP`       | Compare Registers (Sets Flags)              |
-| `[ ]`  |    `0x20`    | `CMPI`      | Compare Immediate (Sets Flags)              |
-| `[ ]`  |    `0x21`    | `TEST`      | Bitwise Logical Compare (Sets Flags)        |
+| `[✓]`  |    `0x10`    | `MUL`       | Unsigned Multiplication                     |
+| `[✓]`  |    `0x11`    | `DIV`       | Unsigned Division                           |
+| `[✓]`  |    `0x12`    | `INC`       | Increment Register by 1                     |
+| `[✓]`  |    `0x13`    | `DEC`       | Decrement Register by 1                     |
+| `[✓]`  |    `0x14`    | `ANDD`      | Bitwise AND Registers                       |
+| `[✓]`  |    `0x15`    | `ANDI`      | Bitwise AND Immediate                       |
+| `[✓]`  |    `0x16`    | `ORR`       | Bitwise OR Registers                        |
+| `[✓]`  |    `0x17`    | `ORI`       | Bitwise OR Immediate                        |
+| `[✓]`  |    `0x18`    | `XORR`      | Bitwise XOR Registers                       |
+| `[✓]`  |    `0x19`    | `XORI`      | Bitwise XOR Immediate                       |
+| `[✓]`  |    `0x1A`    | `NOTT`      | Bitwise NOT (One's Complement)              |
+| `[✓]`  |    `0x1B`    | `SHL`       | Logical Shift Left                          |
+| `[✓]`  |    `0x1C`    | `SHR`       | Logical Shift Right                         |
+| `[✓]`  |    `0x1D`    | `ROLL`      | Rotate Left                                 |
+| `[✓]`  |    `0x1E`    | `RORR`      | Rotate Right                                |
+| `[✓]`  |    `0x1F`    | `CMP`       | Compare Registers (Sets Flags)              |
+| `[✓]`  |    `0x20`    | `CMPI`      | Compare Immediate (Sets Flags)              |
+| `[✓]`  |    `0x21`    | `TEST`      | Bitwise Logical Compare (Sets Flags)        |
 
 ---
 
-### 3. Control Flow & Branching Group (`0x22` – `0x2E`)
+### 3. Control Flow & Branching Group (`0x22` – `0x2F`)
 
-| Status | Opcode (Hex) | Instruction   | Hardware Branch Condition        |
-| :----: | :----------: | :------------ | :------------------------------- |
-| `[ ]`  |    `0x22`    | `JMP`         | Unconditional Jump               |
-| `[ ]`  |    `0x23`    | `JZ` / `JE`   | Jump if Zero (`Z = 1`)           |
-| `[ ]`  |    `0x24`    | `JNZ` / `JNE` | Jump if Not Zero (`Z = 0`)       |
-| `[ ]`  |    `0x25`    | `JC`          | Jump if Carry (`C = 1`)          |
-| `[ ]`  |    `0x26`    | `JNC`         | Jump if Not Carry (`C = 0`)      |
-| `[ ]`  |    `0x27`    | `JS`          | Jump if Sign (`S = 1`)           |
-| `[ ]`  |    `0x28`    | `JNS`         | Jump if Not Sign (`S = 0`)       |
-| `[ ]`  |    `0x29`    | `JA` / `JG`   | Jump if Greater / Above          |
-| `[ ]`  |    `0x2A`    | `REF` / `JL`  | Jump if Less                     |
-| `[ ]`  |    `0x2B`    | `JAE`         | Jump if Greater or Equal         |
-| `[ ]`  |    `0x2C`    | `JBE`         | Jump if Less or Equal            |
-| `[ ]`  |    `0x2D`    | `CALL`        | Call Subroutine (Push IP & Jump) |
-| `[ ]`  |    `0x2E`    | `RET`         | Return from Subroutine (Pop IP)  |
+| Status | Opcode (Hex) | Instruction   | Hardware Branch Condition               |
+| :----: | :----------: | :------------ | :-------------------------------------- |
+| `[ ]`  |    `0x22`    | `JMP`         | Unconditional Jump                      |
+| `[ ]`  |    `0x23`    | `JZ` / `JE`   | Jump if Zero (`Z = 1`)                  |
+| `[ ]`  |    `0x24`    | `JNZ` / `JNE` | Jump if Not Zero (`Z = 0`)              |
+| `[ ]`  |    `0x25`    | `JC`          | Jump if Carry (`C = 1`)                 |
+| `[ ]`  |    `0x26`    | `JNC`         | Jump if Not Carry (`C = 0`)             |
+| `[ ]`  |    `0x27`    | `JS`          | Jump if Sign (`S = 1`)                  |
+| `[ ]`  |    `0x28`    | `JNS`         | Jump if Not Sign (`S = 0`)              |
+| `[ ]`  |    `0x29`    | `JA` / `JG`   | Jump if Greater / Above                 |
+| `[ ]`  |    `0x2A`    | `REF` / `JL`  | Jump if Less                            |
+| `[ ]`  |    `0x2B`    | `JAE`         | Jump if Greater or Equal                |
+| `[ ]`  |    `0x2C`    | `JBE`         | Jump if Less or Equal                   |
+| `[ ]`  |    `0x2D`    | `CALL`        | Call Subroutine (Push IP & Jump)        |
+| `[ ]`  |    `0x2E`    | `RET`         | Return from Subroutine (Pop IP)         |
+| `[ ]`  |    `0x2F`    | `LOOP`        | Decrement Register & Branch if Reg != 0 |
 
 ---
 
-### 4. Flags & System Operations Group (`0x2F` – `0x33`)
+### 4. Flags & System Operations Group (`0x30` – `0x33`)
 
 | Status | Opcode (Hex) | Instruction | Description                    |
 | :----: | :----------: | :---------- | :----------------------------- |
-| `[ ]`  |    `0x2F`    | `CLC`       | Clear Carry Flag (`C = 0`)     |
-| `[ ]`  |    `0x30`    | `STC`       | Set Carry Flag (`C = 1`)       |
-| `[ ]`  |    `0x31`    | `CLR`       | Clear Register / Control Flags |
+| `[ ]`  |    `0x30`    | `CLC`       | Clear Carry Flag (`C = 0`)     |
+| `[ ]`  |    `0x31`    | `STC`       | Set Carry Flag (`C = 1`)       |
+| `[ ]`  |    `0x32`    | `CLR`       | Clear Register / Control Flags |
 | `[ ]`  |    `0x33`    | `HALT`      | Halt CPU Clock & Pipeline      |
 
 ---
