@@ -1,0 +1,35 @@
+{
+    "name": "custom-16bit-cpu",
+    "displayName": "16-Bit Custom Processor Assembly",
+    "description": "Syntax Highlighting for 16-Bit Custom CPU ISA",
+    "version": "1.0.0",
+    "engines": {
+        "vscode": "^1.50.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [
+            {
+                "id": "custom-asm",
+                "aliases": [
+                    "Custom Assembly",
+                    "custom-asm"
+                ],
+                "extensions": [
+                    ".asm",
+                    ".inc",
+                    ".s"
+                ]
+            }
+        ],
+        "grammars": [
+            {
+                "language": "custom-asm",
+                "scopeName": "source.custom-asm",
+                "path": "./syntaxes/asm.tmLanguage.json"
+            }
+        ]
+    }
+}

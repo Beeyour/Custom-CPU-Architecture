@@ -1,0 +1,87 @@
+{
+    "name": "Custom 16-Bit Assembly",
+    "scopeName": "source.custom-asm",
+    "patterns": [
+        { "include": "#comments" },
+        { "include": "#directives" },
+        { "include": "#opcodes" },
+        { "include": "#registers" },
+        { "include": "#labels" },
+        { "include": "#numbers" },
+        { "include": "#strings" }
+    ],
+    "repository": {
+        "comments": {
+            "patterns": [
+                {
+                    "name": "comment.line.semicolon.assembly",
+                    "match": ";.*$"
+                },
+                {
+                    "name": "comment.line.double-slash.assembly",
+                    "match": "//.*$"
+                }
+            ]
+        },
+        "directives": {
+            "patterns": [
+                {
+                    "name": "storage.type.directive.assembly",
+                    "match": "(?i)\\b(DW|DUP)\\b"
+                }
+            ]
+        },
+        "opcodes": {
+            "patterns": [
+                {
+                    "name": "keyword.control.assembly",
+                    "match": "(?i)\\b(BOOT|NOP|LOAD|STOR|MOV|MOVI|PUSH|POP|XCHG|INN|OUTT|ADD|ADDI|ADDM|SUB|SUBI|SUBM|MUL|MULI|DIV|DIVI|INC|DEC|ANDD|ANDI|ORR|ORI|XORR|XORI|NOTT|SHL|SHLI|SHR|SHRI|ROLL|ROLI|RORR|RORI|CMP|CMPI|TEST|JMP|JZ|JE|JNZ|JNE|JC|JNC|JS|JNS|JA|JG|REF|JL|JAE|JBE|CALL|RET|LOOP|CLC|STC|CLR|HALT)\\b"
+                }
+            ]
+        },
+        "registers": {
+            "patterns": [
+                {
+                    "name": "variable.parameter.register.assembly",
+                    "match": "(?i)\\b(AX|BX|CX|DX|BP|DI|SI|SP|FLAG|FLAGS)\\b"
+                }
+            ]
+        },
+        "labels": {
+            "patterns": [
+                {
+                    "name": "entity.name.function.label.assembly",
+                    "match": "^[A-Za-z_][A-Za-z0-9_]*:"
+                }
+            ]
+        },
+        "numbers": {
+            "patterns": [
+                {
+                    "name": "constant.numeric.hex.assembly",
+                    "match": "(?i)\\b(0x[0-9a-f_]+|[0-9a-f_]+h)\\b"
+                },
+                {
+                    "name": "constant.numeric.binary.assembly",
+                    "match": "(?i)\\b([01_]+b|0b[01_]+)\\b"
+                },
+                {
+                    "name": "constant.numeric.decimal.assembly",
+                    "match": "\\b[0-9]+\\b"
+                }
+            ]
+        },
+        "strings": {
+            "patterns": [
+                {
+                    "name": "string.quoted.single.assembly",
+                    "match": "'[^']*'"
+                },
+                {
+                    "name": "string.quoted.double.assembly",
+                    "match": "\"[^\"]*\""
+                }
+            ]
+        }
+    }
+}
