@@ -5,6 +5,7 @@
 > - `/software/assembler/assembler.cpp`
 > - `/Makefile`
 > - `/README.md`
+> - `/package.json` & `/syntaxes/` (VS Code custom syntax extension)
 >
 > All AI-generated outputs and suggestions were thoroughly reviewed, audited, and verified to ensure complete technical accuracy with the hardware design.
 
@@ -71,7 +72,7 @@ A custom 16-bit RISC-like processor designed in **Logisim Evolution**, featuring
 
 ---
 
-### 2. ALU & Comparison Operations Group (`0x0A` – `0x21`)
+### 2. ALU & Comparison Operations Group (`0x0A` – `0x27`)
 
 | Status | Opcode (Hex) | Instruction | Description                                 |
 | :----: | :----------: | :---------- | :------------------------------------------ |
@@ -81,56 +82,62 @@ A custom 16-bit RISC-like processor designed in **Logisim Evolution**, featuring
 | `[✓]`  |    `0x0D`    | `SUB`       | Subtract Register from Register             |
 | `[✓]`  |    `0x0E`    | `SUBI`      | Subtract Immediate value from Register      |
 | `[✓]`  |    `0x0F`    | `SUBM`      | Subtract RAM memory content from Register   |
-| `[✓]`  |    `0x10`    | `MUL`       | Unsigned Multiplication                     |
-| `[✓]`  |    `0x11`    | `DIV`       | Unsigned Division                           |
-| `[✓]`  |    `0x12`    | `INC`       | Increment Register by 1                     |
-| `[✓]`  |    `0x13`    | `DEC`       | Decrement Register by 1                     |
-| `[✓]`  |    `0x14`    | `ANDD`      | Bitwise AND Registers                       |
-| `[✓]`  |    `0x15`    | `ANDI`      | Bitwise AND Immediate                       |
-| `[✓]`  |    `0x16`    | `ORR`       | Bitwise OR Registers                        |
-| `[✓]`  |    `0x17`    | `ORI`       | Bitwise OR Immediate                        |
-| `[✓]`  |    `0x18`    | `XORR`      | Bitwise XOR Registers                       |
-| `[✓]`  |    `0x19`    | `XORI`      | Bitwise XOR Immediate                       |
-| `[✓]`  |    `0x1A`    | `NOTT`      | Bitwise NOT (One's Complement)              |
-| `[✓]`  |    `0x1B`    | `SHL`       | Logical Shift Left                          |
-| `[✓]`  |    `0x1C`    | `SHR`       | Logical Shift Right                         |
-| `[✓]`  |    `0x1D`    | `ROLL`      | Rotate Left                                 |
-| `[✓]`  |    `0x1E`    | `RORR`      | Rotate Right                                |
-| `[✓]`  |    `0x1F`    | `CMP`       | Compare Registers (Sets Flags)              |
-| `[✓]`  |    `0x20`    | `CMPI`      | Compare Immediate (Sets Flags)              |
-| `[✓]`  |    `0x21`    | `TEST`      | Bitwise Logical Compare (Sets Flags)        |
+| `[✓]`  |    `0x10`    | `MUL`       | Unsigned Multiplication (Register)          |
+| `[✓]`  |    `0x11`    | `MULI`      | Unsigned Multiplication (Immediate)         |
+| `[✓]`  |    `0x12`    | `DIV`       | Unsigned Division (Register)                |
+| `[✓]`  |    `0x13`    | `DIVI`      | Unsigned Division (Immediate)               |
+| `[✓]`  |    `0x14`    | `INC`       | Increment Register by 1                     |
+| `[✓]`  |    `0x15`    | `DEC`       | Decrement Register by 1                     |
+| `[✓]`  |    `0x16`    | `ANDD`      | Bitwise AND Registers                       |
+| `[✓]`  |    `0x17`    | `ANDI`      | Bitwise AND Immediate                       |
+| `[✓]`  |    `0x18`    | `ORR`       | Bitwise OR Registers                        |
+| `[✓]`  |    `0x19`    | `ORI`       | Bitwise OR Immediate                        |
+| `[✓]`  |    `0x1A`    | `XORR`      | Bitwise XOR Registers                       |
+| `[✓]`  |    `0x1B`    | `XORI`      | Bitwise XOR Immediate                       |
+| `[✓]`  |    `0x1C`    | `NOTT`      | Bitwise NOT (One's Complement)              |
+| `[✓]`  |    `0x1D`    | `SHL`       | Logical Shift Left (Register)               |
+| `[✓]`  |    `0x1E`    | `SHLI`      | Logical Shift Left (Immediate 4-bit)        |
+| `[✓]`  |    `0x1F`    | `SHR`       | Logical Shift Right (Register)              |
+| `[✓]`  |    `0x20`    | `SHRI`      | Logical Shift Right (Immediate 4-bit)       |
+| `[✓]`  |    `0x21`    | `ROLL`      | Rotate Left (Register)                      |
+| `[✓]`  |    `0x22`    | `ROLI`      | Rotate Left (Immediate 4-bit)               |
+| `[✓]`  |    `0x23`    | `RORR`      | Rotate Right (Register)                     |
+| `[✓]`  |    `0x24`    | `RORI`      | Rotate Right (Immediate 4-bit)              |
+| `[✓]`  |    `0x25`    | `CMP`       | Compare Registers (Sets Flags)              |
+| `[✓]`  |    `0x26`    | `CMPI`      | Compare Immediate (Sets Flags)              |
+| `[✓]`  |    `0x27`    | `TEST`      | Bitwise Logical Compare (Sets Flags)        |
 
 ---
 
-### 3. Control Flow & Branching Group (`0x22` – `0x2F`)
+### 3. Control Flow & Branching Group (`0x28` – `0x35`)
 
 | Status | Opcode (Hex) | Instruction   | Hardware Branch Condition               |
 | :----: | :----------: | :------------ | :-------------------------------------- |
-| `[ ]`  |    `0x22`    | `JMP`         | Unconditional Jump                      |
-| `[ ]`  |    `0x23`    | `JZ` / `JE`   | Jump if Zero (`Z = 1`)                  |
-| `[ ]`  |    `0x24`    | `JNZ` / `JNE` | Jump if Not Zero (`Z = 0`)              |
-| `[ ]`  |    `0x25`    | `JC`          | Jump if Carry (`C = 1`)                 |
-| `[ ]`  |    `0x26`    | `JNC`         | Jump if Not Carry (`C = 0`)             |
-| `[ ]`  |    `0x27`    | `JS`          | Jump if Sign (`S = 1`)                  |
-| `[ ]`  |    `0x28`    | `JNS`         | Jump if Not Sign (`S = 0`)              |
-| `[ ]`  |    `0x29`    | `JA` / `JG`   | Jump if Greater / Above                 |
-| `[ ]`  |    `0x2A`    | `REF` / `JL`  | Jump if Less                            |
-| `[ ]`  |    `0x2B`    | `JAE`         | Jump if Greater or Equal                |
-| `[ ]`  |    `0x2C`    | `JBE`         | Jump if Less or Equal                   |
-| `[ ]`  |    `0x2D`    | `CALL`        | Call Subroutine (Push IP & Jump)        |
-| `[ ]`  |    `0x2E`    | `RET`         | Return from Subroutine (Pop IP)         |
-| `[ ]`  |    `0x2F`    | `LOOP`        | Decrement Register & Branch if Reg != 0 |
+| `[ ]`  |    `0x28`    | `JMP`         | Unconditional Jump                      |
+| `[ ]`  |    `0x29`    | `JZ` / `JE`   | Jump if Zero (`Z = 1`)                  |
+| `[ ]`  |    `0x2A`    | `JNZ` / `JNE` | Jump if Not Zero (`Z = 0`)              |
+| `[ ]`  |    `0x2B`    | `JC`          | Jump if Carry (`C = 1`)                 |
+| `[ ]`  |    `0x2C`    | `JNC`         | Jump if Not Carry (`C = 0`)             |
+| `[ ]`  |    `0x2D`    | `JS`          | Jump if Sign (`S = 1`)                  |
+| `[ ]`  |    `0x2E`    | `JNS`         | Jump if Not Sign (`S = 0`)              |
+| `[ ]`  |    `0x2F`    | `JA` / `JG`   | Jump if Greater / Above                 |
+| `[ ]`  |    `0x30`    | `REF` / `JL`  | Jump if Less                            |
+| `[ ]`  |    `0x31`    | `JAE`         | Jump if Greater or Equal                |
+| `[ ]`  |    `0x32`    | `JBE`         | Jump if Less or Equal                   |
+| `[ ]`  |    `0x33`    | `CALL`        | Call Subroutine (Push IP & Jump)        |
+| `[ ]`  |    `0x34`    | `RET`         | Return from Subroutine (Pop IP)         |
+| `[ ]`  |    `0x35`    | `LOOP`        | Decrement Register & Branch if Reg != 0 |
 
 ---
 
-### 4. Flags & System Operations Group (`0x30` – `0x33`)
+### 4. Flags & System Operations Group (`0x36` – `0x39`)
 
 | Status | Opcode (Hex) | Instruction | Description                    |
 | :----: | :----------: | :---------- | :----------------------------- |
-| `[ ]`  |    `0x30`    | `CLC`       | Clear Carry Flag (`C = 0`)     |
-| `[ ]`  |    `0x31`    | `STC`       | Set Carry Flag (`C = 1`)       |
-| `[ ]`  |    `0x32`    | `CLR`       | Clear Register / Control Flags |
-| `[ ]`  |    `0x33`    | `HALT`      | Halt CPU Clock & Pipeline      |
+| `[ ]`  |    `0x36`    | `CLC`       | Clear Carry Flag (`C = 0`)     |
+| `[ ]`  |    `0x37`    | `STC`       | Set Carry Flag (`C = 1`)       |
+| `[ ]`  |    `0x38`    | `CLR`       | Clear Register / Control Flags |
+| `[ ]`  |    `0x39`    | `HALT`      | Halt CPU Clock & Pipeline      |
 
 ---
 
