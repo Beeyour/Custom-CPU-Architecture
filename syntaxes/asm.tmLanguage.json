@@ -1,12 +1,17 @@
 {
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
     "name": "Custom 16-Bit Assembly",
     "scopeName": "source.custom-asm",
     "patterns": [
         { "include": "#comments" },
         { "include": "#directives" },
-        { "include": "#opcodes" },
+        { "include": "#opcodes-memory" },
+        { "include": "#opcodes-alu" },
+        { "include": "#opcodes-jump" },
+        { "include": "#opcodes-system" },
         { "include": "#registers" },
-        { "include": "#labels" },
+        { "include": "#labels-definition" },
+        { "include": "#brackets-and-operators" },
         { "include": "#numbers" },
         { "include": "#strings" }
     ],
@@ -31,27 +36,63 @@
                 }
             ]
         },
-        "opcodes": {
+        "opcodes-memory": {
             "patterns": [
                 {
-                    "name": "keyword.control.assembly",
-                    "match": "(?i)\\b(BOOT|NOP|LOAD|STOR|MOV|MOVI|PUSH|POP|XCHG|INN|OUTT|ADD|ADDI|ADDM|SUB|SUBI|SUBM|MUL|MULI|DIV|DIVI|INC|DEC|ANDD|ANDI|ORR|ORI|XORR|XORI|NOTT|SHL|SHLI|SHR|SHRI|ROLL|ROLI|RORR|RORI|CMP|CMPI|TEST|JMP|JZ|JE|JNZ|JNE|JC|JNC|JS|JNS|JA|JG|REF|JL|JAE|JBE|CALL|RET|LOOP|CLC|STC|CLR|HALT)\\b"
+                    "name": "custom.instruction.memory",
+                    "match": "(?i)\\b(LOAD|STOR|LDR|LAD|STR|MOV|MOVI|PUSH|POP|XCHG|INN|OUTT)\\b"
+                }
+            ]
+        },
+        "opcodes-alu": {
+            "patterns": [
+                {
+                    "name": "custom.instruction.alu",
+                    "match": "(?i)\\b(ADD|ADDI|ADDM|SUB|SUBI|SUBM|MUL|MULI|DIV|DIVI|INC|DEC|ANDD|ANDI|ORR|ORI|XORR|XORI|NOTT|SHL|SHLI|SHR|SHRI|ROLL|ROLI|RORR|RORI|CMP|CMPI|TEST)\\b"
+                }
+            ]
+        },
+        "opcodes-jump": {
+            "patterns": [
+                {
+                    "name": "custom.instruction.jump",
+                    "match": "(?i)\\b(JMP|JZ|JE|JNZ|JNE|JC|JNC|JS|JNS|JA|JG|REF|JL|JAE|JBE|CALL|RET|LOOP)\\b"
+                }
+            ]
+        },
+        "opcodes-system": {
+            "patterns": [
+                {
+                    "name": "custom.instruction.system",
+                    "match": "(?i)\\b(BOOT|NOP|CLC|STC|CLR|HALT)\\b"
                 }
             ]
         },
         "registers": {
             "patterns": [
                 {
-                    "name": "variable.parameter.register.assembly",
-                    "match": "(?i)\\b(AX|BX|CX|DX|BP|DI|SI|SP|FLAG|FLAGS)\\b"
+                    "name": "custom.register",
+                    "match": "(?i)\\b(R[0-6]|SP|FLAGS?|AX|BX|CX|DX|BP|DI|SI)\\b"
                 }
             ]
         },
-        "labels": {
+        "labels-definition": {
             "patterns": [
                 {
                     "name": "entity.name.function.label.assembly",
                     "match": "^[A-Za-z_][A-Za-z0-9_]*:"
+                }
+            ]
+        },
+        "brackets-and-operators": {
+            "patterns": [
+                {
+                    "name": "punctuation.bracket.square.assembly",
+                    "match": "[\\[\\]]"
+                },
+                {
+                    "name": "keyword.operator.math.assembly",
+                    "match": "[\\+\\-\\*/]"
                 }
             ]
         },
