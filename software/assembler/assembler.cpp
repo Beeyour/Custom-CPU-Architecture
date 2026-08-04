@@ -24,7 +24,9 @@ enum FormatType {
     FMT_MEM_SRC,
     FMT_DST_IMM4,
     FMT_JUMP_LABEL,
-    FMT_LOOP_REG_LABEL
+    FMT_LOOP_REG_LABEL,
+    FMT_LDR,
+    FMT_STR
 };
 
 struct InstSpec {
@@ -33,81 +35,84 @@ struct InstSpec {
     uint16_t wordCount;
 };
 
-// Complete Instruction Set Mapping (Opcodes 0x00 to 0x39)
+// Complete Instruction Set Mapping according to opcode.md (Opcodes 0x00 to 0x3B)
 const std::map<std::string, InstSpec> ISA = {
-    // Group 1: Data Movement, Stack & I/O (0x00 - 0x09)
+    // Group 1: Data Movement, Stack & I/O (0x00 - 0x0B)
     {"BOOT", {0x00, FMT_NO_ARG, 1}},
     {"NOP", {0x00, FMT_NO_ARG, 1}},
     {"LOAD", {0x01, FMT_DST_MEM, 2}},
     {"STOR", {0x02, FMT_MEM_SRC, 2}},
-    {"MOV", {0x03, FMT_DST_SRC, 1}},
-    {"MOVI", {0x04, FMT_DST_IMM16, 2}},
-    {"PUSH", {0x05, FMT_SINGLE_SRC, 1}},
-    {"POP", {0x06, FMT_SINGLE_DST, 1}},
-    {"XCHG", {0x07, FMT_DST_SRC, 1}},
-    {"INN", {0x08, FMT_SINGLE_DST, 1}},
-    {"OUTT", {0x09, FMT_SINGLE_SRC, 1}},
+    {"LDR", {0x03, FMT_LDR, 2}},
+    {"STR", {0x04, FMT_STR, 2}},
+    {"MOV", {0x05, FMT_DST_SRC, 1}},
+    {"MOVI", {0x06, FMT_DST_IMM16, 2}},
+    {"PUSH", {0x07, FMT_SINGLE_SRC, 1}},
+    {"POP", {0x08, FMT_SINGLE_DST, 1}},
+    {"XCHG", {0x09, FMT_DST_SRC, 1}},
+    {"INN", {0x0A, FMT_SINGLE_DST, 1}},
+    {"OUTT", {0x0B, FMT_SINGLE_SRC, 1}},
 
-    // Group 2: ALU & Comparison Operations (0x0A - 0x27)
-    {"ADD", {0x0A, FMT_DST_SRC, 1}},
-    {"ADDI", {0x0B, FMT_DST_IMM16, 2}},
-    {"ADDM", {0x0C, FMT_DST_MEM, 2}},
-    {"SUB", {0x0D, FMT_DST_SRC, 1}},
-    {"SUBI", {0x0E, FMT_DST_IMM16, 2}},
-    {"SUBM", {0x0F, FMT_DST_MEM, 2}},
-    {"MUL", {0x10, FMT_DST_SRC, 1}},
-    {"MULI", {0x11, FMT_DST_IMM16, 2}},
-    {"DIV", {0x12, FMT_DST_SRC, 1}},
-    {"DIVI", {0x13, FMT_DST_IMM16, 2}},
-    {"INC", {0x14, FMT_SINGLE_DST, 1}},
-    {"DEC", {0x15, FMT_SINGLE_DST, 1}},
-    {"ANDD", {0x16, FMT_DST_SRC, 1}},
-    {"ANDI", {0x17, FMT_DST_IMM16, 2}},
-    {"ORR", {0x18, FMT_DST_SRC, 1}},
-    {"ORI", {0x19, FMT_DST_IMM16, 2}},
-    {"XORR", {0x1A, FMT_DST_SRC, 1}},
-    {"XORI", {0x1B, FMT_DST_IMM16, 2}},
-    {"NOTT", {0x1C, FMT_SINGLE_DST, 1}},
-    {"SHL", {0x1D, FMT_DST_SRC, 1}},
-    {"SHLI", {0x1E, FMT_DST_IMM4, 1}},
-    {"SHR", {0x1F, FMT_DST_SRC, 1}},
-    {"SHRI", {0x20, FMT_DST_IMM4, 1}},
-    {"ROLL", {0x21, FMT_DST_SRC, 1}},
-    {"ROLI", {0x22, FMT_DST_IMM4, 1}},
-    {"RORR", {0x23, FMT_DST_SRC, 1}},
-    {"RORI", {0x24, FMT_DST_IMM4, 1}},
-    {"CMP", {0x25, FMT_DST_SRC, 1}},
-    {"CMPI", {0x26, FMT_DST_IMM16, 2}},
-    {"TEST", {0x27, FMT_DST_SRC, 1}},
+    // Group 2: ALU & Comparison Operations (0x0C - 0x29)
+    {"ADD", {0x0C, FMT_DST_SRC, 1}},
+    {"ADDI", {0x0D, FMT_DST_IMM16, 2}},
+    {"ADDM", {0x0E, FMT_DST_MEM, 2}},
+    {"SUB", {0x0F, FMT_DST_SRC, 1}},
+    {"SUBI", {0x10, FMT_DST_IMM16, 2}},
+    {"SUBM", {0x11, FMT_DST_MEM, 2}},
+    {"MUL", {0x12, FMT_DST_SRC, 1}},
+    {"MULI", {0x13, FMT_DST_IMM16, 2}},
+    {"DIV", {0x14, FMT_DST_SRC, 1}},
+    {"DIVI", {0x15, FMT_DST_IMM16, 2}},
+    {"INC", {0x16, FMT_SINGLE_DST, 1}},
+    {"DEC", {0x17, FMT_SINGLE_DST, 1}},
+    {"ANDD", {0x18, FMT_DST_SRC, 1}},
+    {"ANDI", {0x19, FMT_DST_IMM16, 2}},
+    {"ORR", {0x1A, FMT_DST_SRC, 1}},
+    {"ORI", {0x1B, FMT_DST_IMM16, 2}},
+    {"XORR", {0x1C, FMT_DST_SRC, 1}},
+    {"XORI", {0x1D, FMT_DST_IMM16, 2}},
+    {"NOTT", {0x1E, FMT_SINGLE_DST, 1}},
+    {"SHL", {0x1F, FMT_DST_SRC, 1}},
+    {"SHLI", {0x20, FMT_DST_IMM4, 1}},
+    {"SHR", {0x21, FMT_DST_SRC, 1}},
+    {"SHRI", {0x22, FMT_DST_IMM4, 1}},
+    {"ROLL", {0x23, FMT_DST_SRC, 1}},
+    {"ROLI", {0x24, FMT_DST_IMM4, 1}},
+    {"RORR", {0x25, FMT_DST_SRC, 1}},
+    {"RORI", {0x26, FMT_DST_IMM4, 1}},
+    {"CMP", {0x27, FMT_DST_SRC, 1}},
+    {"CMPI", {0x28, FMT_DST_IMM16, 2}},
+    {"TEST", {0x29, FMT_DST_SRC, 1}},
 
-    // Group 3: Control Flow & Branching (0x28 - 0x35)
-    {"JMP", {0x28, FMT_JUMP_LABEL, 2}},
-    {"JZ", {0x29, FMT_JUMP_LABEL, 2}},
-    {"JE", {0x29, FMT_JUMP_LABEL, 2}},
-    {"JNZ", {0x2A, FMT_JUMP_LABEL, 2}},
-    {"JNE", {0x2A, FMT_JUMP_LABEL, 2}},
-    {"JC", {0x2B, FMT_JUMP_LABEL, 2}},
-    {"JNC", {0x2C, FMT_JUMP_LABEL, 2}},
-    {"JS", {0x2D, FMT_JUMP_LABEL, 2}},
-    {"JNS", {0x2E, FMT_JUMP_LABEL, 2}},
-    {"JA", {0x2F, FMT_JUMP_LABEL, 2}},
-    {"JG", {0x2F, FMT_JUMP_LABEL, 2}},
-    {"REF", {0x30, FMT_JUMP_LABEL, 2}},
-    {"JL", {0x30, FMT_JUMP_LABEL, 2}},
-    {"JAE", {0x31, FMT_JUMP_LABEL, 2}},
-    {"JBE", {0x32, FMT_JUMP_LABEL, 2}},
-    {"CALL", {0x33, FMT_JUMP_LABEL, 2}},
-    {"RET", {0x34, FMT_NO_ARG, 1}},
-    {"LOOP", {0x35, FMT_LOOP_REG_LABEL, 2}},
+    // Group 3: Control Flow & Branching (0x2A - 0x37)
+    {"JMP", {0x2A, FMT_JUMP_LABEL, 2}},
+    {"JZ", {0x2B, FMT_JUMP_LABEL, 2}},
+    {"JE", {0x2B, FMT_JUMP_LABEL, 2}},
+    {"JNZ", {0x2C, FMT_JUMP_LABEL, 2}},
+    {"JNE", {0x2C, FMT_JUMP_LABEL, 2}},
+    {"JC", {0x2D, FMT_JUMP_LABEL, 2}},
+    {"JNC", {0x2E, FMT_JUMP_LABEL, 2}},
+    {"JS", {0x2F, FMT_JUMP_LABEL, 2}},
+    {"JNS", {0x30, FMT_JUMP_LABEL, 2}},
+    {"JA", {0x31, FMT_JUMP_LABEL, 2}},
+    {"JG", {0x31, FMT_JUMP_LABEL, 2}},
+    {"REF", {0x32, FMT_JUMP_LABEL, 2}},
+    {"JL", {0x32, FMT_JUMP_LABEL, 2}},
+    {"JAE", {0x33, FMT_JUMP_LABEL, 2}},
+    {"JBE", {0x34, FMT_JUMP_LABEL, 2}},
+    {"CALL", {0x35, FMT_JUMP_LABEL, 2}},
+    {"RET", {0x36, FMT_NO_ARG, 1}},
+    {"LOOP", {0x37, FMT_LOOP_REG_LABEL, 2}},
 
-    // Group 4: Flags & System Operations (0x36 - 0x39)
-    {"CLC", {0x36, FMT_NO_ARG, 1}},
-    {"STC", {0x37, FMT_NO_ARG, 1}},
-    {"CLR", {0x38, FMT_SINGLE_DST, 1}},
-    {"HALT", {0x39, FMT_NO_ARG, 1}}};
+    // Group 4: Flags & System Operations (0x38 - 0x3B)
+    {"CLC", {0x38, FMT_NO_ARG, 1}},
+    {"STC", {0x39, FMT_NO_ARG, 1}},
+    {"CLR", {0x3A, FMT_SINGLE_DST, 1}},
+    {"HALT", {0x3B, FMT_NO_ARG, 1}}};
 
-const std::unordered_map<std::string, uint16_t> REGISTERS = {{"AX", 0x0}, {"BX", 0x1}, {"CX", 0x2}, {"DX", 0x3},   {"BP", 0x4},
-                                                             {"DI", 0x5}, {"SI", 0x6}, {"SP", 0x7}, {"FLAG", 0xF}, {"FLAGS", 0xF}};
+// Register Map (R0-R6, SP=1110, FLAG=1111)
+const std::unordered_map<std::string, uint16_t> REGISTERS = {{"R0", 0x0}, {"R1", 0x1}, {"R2", 0x2}, {"R3", 0x3},   {"R4", 0x4},
+                                                             {"R5", 0x5}, {"R6", 0x6}, {"SP", 0xE}, {"FLAG", 0xF}, {"FLAGS", 0xF}};
 
 std::unordered_map<std::string, uint16_t> symbolTable;
 
@@ -161,7 +166,6 @@ std::vector<std::string> tokenize(const std::string& line) {
         else if (c == ']')
             inBracket = false;
 
-        // إذا كانت مسافة ونحن لسنا داخل أقواس، ننهي الكلمة
         if (std::isspace(c) && !inBracket) {
             if (!current.empty()) {
                 tokens.push_back(trim(current));
@@ -177,7 +181,6 @@ std::vector<std::string> tokenize(const std::string& line) {
     return tokens;
 }
 
-// Split data arguments by comma while preserving quotes and DUP parens
 std::vector<std::string> splitDataArgs(const std::string& str) {
     std::vector<std::string> args;
     std::string current;
@@ -210,7 +213,7 @@ std::vector<std::string> splitDataArgs(const std::string& str) {
 }
 
 // ============================================================================
-// 3. Advanced Numerical & Data Parsing Engine
+// 3. Numerical & Expression Parsing Engine
 // ============================================================================
 
 uint16_t parseLiteralOrLabel(std::string str, bool pass2) {
@@ -218,9 +221,6 @@ uint16_t parseLiteralOrLabel(std::string str, bool pass2) {
     str.erase(std::remove(str.begin(), str.end(), ']'), str.end());
     str = trim(str);
 
-    // ==========================================
-    // دعم العمليات الحسابية (مثل: word1 + 1)
-    // ==========================================
     size_t plusPos = str.rfind('+');
     if (plusPos != std::string::npos) {
         return parseLiteralOrLabel(str.substr(0, plusPos), pass2) + parseLiteralOrLabel(str.substr(plusPos + 1), pass2);
@@ -230,19 +230,16 @@ uint16_t parseLiteralOrLabel(std::string str, bool pass2) {
         return parseLiteralOrLabel(str.substr(0, minusPos), pass2) - parseLiteralOrLabel(str.substr(minusPos + 1), pass2);
     }
 
-    // Remove underscore separators
     std::string cleanStr;
     for (char c : str)
         if (c != '_') cleanStr += c;
 
     std::string upperStr = toUpper(cleanStr);
 
-    // Symbol / Label Lookup
     if (symbolTable.find(upperStr) != symbolTable.end()) {
         return symbolTable.at(upperStr);
     }
 
-    // Binary Literal (e.g. 01011010b or 0b01011010)
     if (!upperStr.empty() && upperStr.back() == 'B' && upperStr.find("0X") == std::string::npos) {
         try {
             return static_cast<uint16_t>(std::stoul(upperStr.substr(0, upperStr.size() - 1), nullptr, 2));
@@ -256,7 +253,6 @@ uint16_t parseLiteralOrLabel(std::string str, bool pass2) {
         }
     }
 
-    // Hexadecimal Parsing (0x1234 or 1234h)
     if (upperStr.rfind("0X", 0) == 0) {
         return static_cast<uint16_t>(std::stoul(upperStr.substr(2), nullptr, 16));
     }
@@ -264,7 +260,6 @@ uint16_t parseLiteralOrLabel(std::string str, bool pass2) {
         return static_cast<uint16_t>(std::stoul(upperStr.substr(0, upperStr.size() - 1), nullptr, 16));
     }
 
-    // Decimal Parsing
     try {
         return static_cast<uint16_t>(std::stoi(cleanStr));
     } catch (...) {
@@ -274,12 +269,45 @@ uint16_t parseLiteralOrLabel(std::string str, bool pass2) {
         return 0x0000;
     }
 }
-// Parse DW Data Elements (Supports numbers, strings, DUP)
+
+// Parses memory expressions like [4 + 10 + R1] or [R4 + 3] or [R4]
+void parseBaseOffsetMem(std::string str, uint16_t& regCode, uint16_t& offsetVal, bool pass2) {
+    str.erase(std::remove(str.begin(), str.end(), '['), str.end());
+    str.erase(std::remove(str.begin(), str.end(), ']'), str.end());
+    str = trim(str);
+
+    regCode = 0;
+    offsetVal = 0;
+
+    std::string clean;
+    for (char c : str) {
+        if (c == '-') {
+            clean += " + -";
+        } else {
+            clean += c;
+        }
+    }
+
+    std::stringstream ss(clean);
+    std::string segment;
+
+    while (std::getline(ss, segment, '+')) {
+        segment = trim(segment);
+        if (segment.empty()) continue;
+
+        std::string upperSeg = toUpper(segment);
+        if (REGISTERS.find(upperSeg) != REGISTERS.end()) {
+            regCode = REGISTERS.at(upperSeg);
+        } else {
+            offsetVal += parseLiteralOrLabel(segment, pass2);
+        }
+    }
+}
+
 std::vector<uint16_t> parseDataElement(std::string arg, bool pass2) {
     std::vector<uint16_t> words;
     arg = trim(arg);
 
-    // 1. Handle DUP expression: e.g., "5 dup(0)" or "3 dup('a')"
     std::string upperArg = toUpper(arg);
     size_t dupPos = upperArg.find(" DUP");
     if (dupPos == std::string::npos) dupPos = upperArg.find("\tDUP");
@@ -304,7 +332,6 @@ std::vector<uint16_t> parseDataElement(std::string arg, bool pass2) {
         }
     }
 
-    // 2. Handle String / Character Literals: 'hhfs' or "b"
     if ((arg.front() == '\'' && arg.back() == '\'') || (arg.front() == '"' && arg.back() == '"')) {
         std::string content = arg.substr(1, arg.length() - 2);
         if (content.empty()) {
@@ -321,12 +348,10 @@ std::vector<uint16_t> parseDataElement(std::string arg, bool pass2) {
         return words;
     }
 
-    // 3. Handle Standard Numeric Literals / Labels
     words.push_back(parseLiteralOrLabel(arg, pass2));
     return words;
 }
 
-// Parse entire line containing DW data
 std::vector<uint16_t> parseDWLine(const std::string& dataStr, bool pass2) {
     std::vector<uint16_t> lineWords;
     std::vector<std::string> args = splitDataArgs(dataStr);
@@ -345,7 +370,6 @@ int main(int argc, char* argv[]) {
     std::string inputPath = "programs/program.asm";
     std::string outputPath = "programs/memory.hex";
 
-    // Only override paths if they do NOT start with '-' (ignoring flag arguments)
     if (argc >= 2 && argv[1][0] != '-') inputPath = argv[1];
     if (argc >= 3 && argv[2][0] != '-') outputPath = argv[2];
 
@@ -355,9 +379,7 @@ int main(int argc, char* argv[]) {
     std::cout << " Target: " << outputPath << "\n";
     std::cout << "========================================================\n";
 
-    // ------------------------------------------------------------------------
     // PASS 1: Symbol Table & Address Calculation
-    // ------------------------------------------------------------------------
     {
         std::ifstream pass1File(inputPath);
         if (!pass1File.is_open()) {
@@ -375,7 +397,6 @@ int main(int argc, char* argv[]) {
             cleanLine = trim(cleanLine);
             if (cleanLine.empty()) continue;
 
-            // Extract Label if present
             size_t colonPos = cleanLine.find(':');
             if (colonPos != std::string::npos) {
                 std::string labelName = trim(cleanLine.substr(0, colonPos));
@@ -397,7 +418,6 @@ int main(int argc, char* argv[]) {
 
             std::string mnemonic = toUpper(tokens[0]);
 
-            // Check for Data Directive (DW) or Implicit Data Definition
             if (mnemonic == "DW") {
                 size_t dwPos = cleanLine.find("DW");
                 if (dwPos == std::string::npos) dwPos = cleanLine.find("dw");
@@ -407,7 +427,6 @@ int main(int argc, char* argv[]) {
             } else if (ISA.find(mnemonic) != ISA.end()) {
                 currentAddress += ISA.at(mnemonic).wordCount;
             } else {
-                // Check if it's an implicit DW without the DW keyword
                 std::vector<uint16_t> implicitDW = parseDWLine(cleanLine, false);
                 currentAddress += implicitDW.size();
             }
@@ -415,9 +434,7 @@ int main(int argc, char* argv[]) {
         pass1File.close();
     }
 
-    // ------------------------------------------------------------------------
     // PASS 2: Machine Code Generation
-    // ------------------------------------------------------------------------
     std::vector<uint16_t> machineCode;
     {
         std::ifstream pass2File(inputPath);
@@ -430,7 +447,6 @@ int main(int argc, char* argv[]) {
             cleanLine = trim(cleanLine);
             if (cleanLine.empty()) continue;
 
-            // Strip Label
             size_t colonPos = cleanLine.find(':');
             if (colonPos != std::string::npos) {
                 cleanLine = trim(cleanLine.substr(colonPos + 1));
@@ -442,7 +458,6 @@ int main(int argc, char* argv[]) {
 
             std::string mnemonic = toUpper(tokens[0]);
 
-            // Process Data Directives (DW)
             if (mnemonic == "DW") {
                 size_t dwPos = cleanLine.find("DW");
                 if (dwPos == std::string::npos) dwPos = cleanLine.find("dw");
@@ -452,7 +467,6 @@ int main(int argc, char* argv[]) {
                 continue;
             }
 
-            // Process Standard Instructions
             if (ISA.find(mnemonic) != ISA.end()) {
                 InstSpec spec = ISA.at(mnemonic);
                 try {
@@ -463,12 +477,24 @@ int main(int argc, char* argv[]) {
 
                         case FMT_SINGLE_DST:
                             if (tokens.size() < 2) throw std::invalid_argument("Missing destination register argument");
-                            machineCode.push_back(buildWord(spec.opcode, getRegisterCode(tokens[1]), 0));
+                            {
+                                uint16_t srcField = 0;
+                                if (spec.opcode == 0x08) {  // POP requires 1110 (SP) in SRC field
+                                    srcField = 0x0E;
+                                }
+                                machineCode.push_back(buildWord(spec.opcode, getRegisterCode(tokens[1]), srcField));
+                            }
                             break;
 
                         case FMT_SINGLE_SRC:
                             if (tokens.size() < 2) throw std::invalid_argument("Missing source register argument");
-                            machineCode.push_back(buildWord(spec.opcode, 0, getRegisterCode(tokens[1])));
+                            {
+                                uint16_t dstField = 0;
+                                if (spec.opcode == 0x07) {  // PUSH requires 1110 (SP) in DST field
+                                    dstField = 0x0E;
+                                }
+                                machineCode.push_back(buildWord(spec.opcode, dstField, getRegisterCode(tokens[1])));
+                            }
                             break;
 
                         case FMT_DST_SRC:
@@ -497,6 +523,30 @@ int main(int argc, char* argv[]) {
                             }
                             break;
 
+                        case FMT_LDR:
+                            if (tokens.size() < 3) throw std::invalid_argument("Requires <DST> and [<BASE> + <OFFSET>]");
+                            {
+                                uint16_t dstReg = getRegisterCode(tokens[1]);
+                                uint16_t srcReg = 0;
+                                uint16_t offsetVal = 0;
+                                parseBaseOffsetMem(tokens[2], srcReg, offsetVal, true);
+                                machineCode.push_back(buildWord(spec.opcode, dstReg, srcReg));
+                                machineCode.push_back(offsetVal);
+                            }
+                            break;
+
+                        case FMT_STR:
+                            if (tokens.size() < 3) throw std::invalid_argument("Requires [<BASE> + <OFFSET>] and <SRC>");
+                            {
+                                uint16_t srcReg = getRegisterCode(tokens[2]);
+                                uint16_t dstReg = 0;
+                                uint16_t offsetVal = 0;
+                                parseBaseOffsetMem(tokens[1], dstReg, offsetVal, true);
+                                machineCode.push_back(buildWord(spec.opcode, dstReg, srcReg));
+                                machineCode.push_back(offsetVal);
+                            }
+                            break;
+
                         case FMT_JUMP_LABEL:
                             if (tokens.size() < 2) throw std::invalid_argument("Missing target <LABEL/ADDR>");
                             machineCode.push_back(buildWord(spec.opcode, 0, 0));
@@ -515,7 +565,6 @@ int main(int argc, char* argv[]) {
                     return 1;
                 }
             } else {
-                // Implicit Data Definition
                 std::vector<uint16_t> implicitWords = parseDWLine(cleanLine, true);
                 machineCode.insert(machineCode.end(), implicitWords.begin(), implicitWords.end());
             }
@@ -523,15 +572,12 @@ int main(int argc, char* argv[]) {
         pass2File.close();
     }
 
-    // Append 0xFFFF sentinel marker to halt execution
     machineCode.push_back(0xFFFF);
 
-    // Pad memory image to full 16-word blocks
     while (machineCode.size() % 16 != 0) {
         machineCode.push_back(0x0000);
     }
 
-    // Write Logisim Evolution v3.0 Hex Image
     std::ofstream outFile(outputPath);
     if (!outFile.is_open()) {
         std::cerr << "Fatal Error: Unable to write destination file: " << outputPath << "\n";
