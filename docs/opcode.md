@@ -37,14 +37,14 @@ General-purpose and special registers are encoded using a 4-bit field inside ins
 
 | Binary Code | Register Name | Role / Description   |
 | :---------: | :-----------: | :------------------- |
-|   `0000`    |   **`AX`**    | Accumulator Register |
-|   `0001`    |   **`BX`**    | Base Register        |
-|   `0010`    |   **`CX`**    | Counter Register     |
-|   `0011`    |   **`DX`**    | Data Register        |
-|   `0100`    |   **`BP`**    | Base Pointer         |
-|   `0101`    |   **`DI`**    | Destination Index    |
-|   `0110`    |   **`SI`**    | Source Index         |
-|   `0111`    |   **`SP`**    | Stack Pointer        |
+|   `0000`    |   **`R0`**    | Accumulator Register |
+|   `0001`    |   **`R1`**    | Base Register        |
+|   `0010`    |   **`R2`**    | Counter Register     |
+|   `0011`    |   **`R3`**    | Data Register        |
+|   `0100`    |   **`R4`**    | Base Pointer         |
+|   `0101`    |   **`R5`**    | Destination Index    |
+|   `0110`    |   **`R6`**    | Source Index         |
+|   `1110`    |   **`SP`**    | Stack Pointer        |
 |   `1111`    |  **`FLAG`**   | Flags Register       |
 
 ---
@@ -68,21 +68,21 @@ This guide defines the standardized placeholders used across instruction syntax 
 
 | Symbol                |  Width  | Description                                             | Assembly Example & Behavior                                     |
 | :-------------------- | :-----: | :------------------------------------------------------ | :-------------------------------------------------------------- |
-| **`<DST>`**           | 4 Bits  | Destination register ID for results.                    | `MOV AX, BX`<br>_(Copies value of `BX` into `AX`)_              |
-| **`<SRC>`**           | 4 Bits  | Source register ID holding input data.                  | `ADD AX, CX`<br>_(Adds `CX` to `AX`, stores in `AX`)_           |
-| **`<REG>`**           | 4 Bits  | Target register for single-reg / loop ops.              | `LOOP CX, START`<br>_(Decrements `CX` & branches if `CX != 0`)_ |
-| **`[<ADDR>]`**        | 16 Bits | Absolute RAM address. `[ ]` forces RAM access.          | `LOAD AX, [32F1h]`<br>_(Reads RAM at `0x32F1` into `AX`)_       |
-| **`[<REG> + <IMM>]`** |   Var   | Base Register + Offset Memory addressing.               | `LAD AX, [CX + 5]` / `STR [BX + 3], CX`                         |
-| **`<IMM16>`**         | 16 Bits | 16-bit literal loaded from 2nd instruction word.        | `MOVI AX, 00FFh`<br>_(Loads constant `0x00FF` into `AX`)_       |
-| **`<IMM4>`**          | 4 Bits  | 4-bit literal (`0–15` / `0h–Fh`) packed in `SRC` field. | `SHLI AX, Fh`<br>_(Shifts `AX` left by 15 (`0xF`) bits)_        |
+| **`<DST>`**           | 4 Bits  | Destination register ID for results.                    | `MOV R0, R1`<br>_(Copies value of `R1` into `R0`)_              |
+| **`<SRC>`**           | 4 Bits  | Source register ID holding input data.                  | `ADD R0, R2`<br>_(Adds `R2` to `R0`, stores in `R0`)_           |
+| **`<REG>`**           | 4 Bits  | Target register for single-reg / loop ops.              | `LOOP R2, START`<br>_(Decrements `R2` & branches if `R2 != 0`)_ |
+| **`[<ADDR>]`**        | 16 Bits | Absolute RAM address. `[ ]` forces RAM access.          | `LOAD R0, [32F1h]`<br>_(Reads RAM at `0x32F1` into `R0`)_       |
+| **`[<REG> + <IMM>]`** |   Var   | Base Register + Offset Memory addressing.               | `LAD R0, [R2 + 5]` / `STR [R1 + 3], R2`                         |
+| **`<IMM16>`**         | 16 Bits | 16-bit literal loaded from 2nd instruction word.        | `MOVI R0, 00FFh`<br>_(Loads constant `0x00FF` into `R0`)_       |
+| **`<IMM4>`**          | 4 Bits  | 4-bit literal (`0–15` / `0h–Fh`) packed in `SRC` field. | `SHLI R0, Fh`<br>_(Shifts `R0` left by 15 (`0xF`) bits)_        |
 | **`<LABEL>`**         |   Var   | Code label resolved to jump address by assembler.       | `JZ PROCESS`<br>_(Jumps to `PROCESS` if Zero `Z = 1`)_          |
 
 ---
 
 ### 💡 Key Syntax Rules:
 
-- **Memory Brackets `[ ]`:** Plain terms mean registers/constants (`AX`, `32F1h`). Brackets `[32F1h]` trigger a RAM read/write.
-- **`<IMM16>` vs `<IMM4>`:** `<IMM16>` requires two memory reads, while `<IMM4>` is embedded directly inside the opcode word.
+- **Memory Brackets `[ ]`:** Plain terms mean registers/constants (`R0`, `32F1h`). Brackets `[32F1h]` trigger a RAM read/write.
+- **`<IMM16>` vs `<IMM4>`:** `<IMM16>` requires two memory words (32 bits total), while `<IMM4>` is embedded directly inside the 16-bit opcode word.
 - **Operand Order:** Target always comes first: `INSTRUCTION <DST>, <SRC>`.
 
 ---
@@ -113,13 +113,13 @@ This guide defines the standardized placeholders used across instruction syntax 
 
     Binary Pattern: [ xx [SRC] [DST] 000011 ]
     Opcode: 0x03 (0b000011)
-    Syntax: LAD <DST>, [<REG> + <OFFSET>]
+    Syntax: LAD <DST>, [<SRC> + <IMM16>]
 
 #### 5. `STR` — Store Register with Base + Offset Addressing
 
     Binary Pattern: [ xx [SRC] [DST] 000100 ]
     Opcode: 0x04 (0b000100)
-    Syntax: STR [<REG> + <OFFSET>], <SRC>
+    Syntax: STR [<DST> + <IMM16>], <SRC>
 
 #### 6. `MOV` — Register to Register Transfer
 
@@ -129,19 +129,19 @@ This guide defines the standardized placeholders used across instruction syntax 
 
 #### 7. `MOVI` — Load Immediate 16-bit Value
 
-    Binary Pattern: [ xx 0111 [DST] 000110 ]
+    Binary Pattern: [ xx xxxx [DST] 000110 ]
     Opcode: 0x06 (0b000110)
     Syntax: MOVI <DST>, <IMM16>
 
 #### 8. `PUSH` — Push Value onto Stack
 
-    Binary Pattern: [ xx [SRC] 0111 000111 ]
+    Binary Pattern: [ xx [SRC] 1110 000111 ]
     Opcode: 0x07 (0b000111)
     Syntax: PUSH <SRC>
 
 #### 9. `POP` — Pop Value from Stack
 
-    Binary Pattern: [ xx 0111 [DST] 001000 ]
+    Binary Pattern: [ xx 1110 [DST] 001000 ]
     Opcode: 0x08 (0b001000)
     Syntax: POP <DST>
 
