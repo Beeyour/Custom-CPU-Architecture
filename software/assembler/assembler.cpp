@@ -26,7 +26,11 @@ enum FormatType {
     FMT_JUMP_LABEL,
     FMT_LOOP_REG_LABEL,
     FMT_LDR,
-    FMT_STR
+    FMT_STR,
+    FMT_JMP,
+    FMT_JMP_REG,
+    FMT_CALL,
+    FMT_CALL_REG
 };
 
 struct InstSpec {
@@ -35,7 +39,7 @@ struct InstSpec {
     uint16_t wordCount;
 };
 
-// Complete Instruction Set Mapping according to opcode.md (Opcodes 0x00 to 0x3B)
+// Complete Instruction Set Mapping according to updated opcode.md (0x00 to 0x3F)
 const std::map<std::string, InstSpec> ISA = {
     // Group 1: Data Movement, Stack & I/O (0x00 - 0x0B)
     {"BOOT", {0x00, FMT_NO_ARG, 1}},
@@ -52,7 +56,7 @@ const std::map<std::string, InstSpec> ISA = {
     {"INN", {0x0A, FMT_SINGLE_DST, 1}},
     {"OUTT", {0x0B, FMT_SINGLE_SRC, 1}},
 
-    // Group 2: ALU & Comparison Operations (0x0C - 0x29)
+    // Group 2: ALU & Comparison Operations (0x0C - 0x2A)
     {"ADD", {0x0C, FMT_DST_SRC, 1}},
     {"ADDI", {0x0D, FMT_DST_IMM16, 2}},
     {"ADDM", {0x0E, FMT_DST_MEM, 2}},
@@ -83,32 +87,34 @@ const std::map<std::string, InstSpec> ISA = {
     {"CMP", {0x27, FMT_DST_SRC, 1}},
     {"CMPI", {0x28, FMT_DST_IMM16, 2}},
     {"TEST", {0x29, FMT_DST_SRC, 1}},
+    {"TESTI", {0x2A, FMT_DST_IMM16, 2}},
 
-    // Group 3: Control Flow & Branching (0x2A - 0x37)
-    {"JMP", {0x2A, FMT_JUMP_LABEL, 2}},
-    {"JZ", {0x2B, FMT_JUMP_LABEL, 2}},
-    {"JE", {0x2B, FMT_JUMP_LABEL, 2}},
-    {"JNZ", {0x2C, FMT_JUMP_LABEL, 2}},
-    {"JNE", {0x2C, FMT_JUMP_LABEL, 2}},
-    {"JC", {0x2D, FMT_JUMP_LABEL, 2}},
-    {"JNC", {0x2E, FMT_JUMP_LABEL, 2}},
-    {"JS", {0x2F, FMT_JUMP_LABEL, 2}},
-    {"JNS", {0x30, FMT_JUMP_LABEL, 2}},
-    {"JA", {0x31, FMT_JUMP_LABEL, 2}},
+    // Group 3: Control Flow & Branching (0x2B - 0x36)
+    {"JMP", {0x2B, FMT_JMP, 2}},
+    {"JUMP", {0x2B, FMT_JMP, 2}},
+    {"JMP_R", {0x2C, FMT_JMP_REG, 1}},
+    {"JUMP_R", {0x2C, FMT_JMP_REG, 1}},
+    {"JZ", {0x2D, FMT_JUMP_LABEL, 2}},
+    {"JE", {0x2D, FMT_JUMP_LABEL, 2}},
+    {"JNZ", {0x2E, FMT_JUMP_LABEL, 2}},
+    {"JNE", {0x2E, FMT_JUMP_LABEL, 2}},
+    {"JC", {0x2F, FMT_JUMP_LABEL, 2}},
+    {"JB", {0x2F, FMT_JUMP_LABEL, 2}},
+    {"JNC", {0x30, FMT_JUMP_LABEL, 2}},
+    {"JAE", {0x30, FMT_JUMP_LABEL, 2}},
     {"JG", {0x31, FMT_JUMP_LABEL, 2}},
-    {"REF", {0x32, FMT_JUMP_LABEL, 2}},
     {"JL", {0x32, FMT_JUMP_LABEL, 2}},
-    {"JAE", {0x33, FMT_JUMP_LABEL, 2}},
-    {"JBE", {0x34, FMT_JUMP_LABEL, 2}},
-    {"CALL", {0x35, FMT_JUMP_LABEL, 2}},
-    {"RET", {0x36, FMT_NO_ARG, 1}},
-    {"LOOP", {0x37, FMT_LOOP_REG_LABEL, 2}},
+    {"CALL", {0x33, FMT_CALL, 2}},
+    {"CALL_R", {0x34, FMT_CALL_REG, 2}},
+    {"RET", {0x35, FMT_NO_ARG, 1}},
+    {"LOOP", {0x36, FMT_LOOP_REG_LABEL, 2}},
+    {"LOOPP", {0x36, FMT_LOOP_REG_LABEL, 2}},
 
-    // Group 4: Flags & System Operations (0x38 - 0x3B)
-    {"CLC", {0x38, FMT_NO_ARG, 1}},
-    {"STC", {0x39, FMT_NO_ARG, 1}},
-    {"CLR", {0x3A, FMT_SINGLE_DST, 1}},
-    {"HALT", {0x3B, FMT_NO_ARG, 1}}};
+    // Group 4: Flags & System Operations (0x3C - 0x3F)
+    {"CLC", {0x3C, FMT_NO_ARG, 1}},
+    {"STC", {0x3D, FMT_NO_ARG, 1}},
+    {"CLR", {0x3E, FMT_SINGLE_DST, 1}},
+    {"HALT", {0x3F, FMT_NO_ARG, 1}}};
 
 // Register Map (R0-R6, SP=1110, FLAG=1111)
 const std::unordered_map<std::string, uint16_t> REGISTERS = {{"R0", 0x0}, {"R1", 0x1}, {"R2", 0x2}, {"R3", 0x3},   {"R4", 0x4},
@@ -138,6 +144,11 @@ std::string removeComments(const std::string& line) {
 std::string toUpper(std::string str) {
     for (char& c : str) c = static_cast<char>(std::toupper(c));
     return str;
+}
+
+bool isRegister(const std::string& token) {
+    std::string upper = toUpper(trim(token));
+    return REGISTERS.find(upper) != REGISTERS.end();
 }
 
 uint16_t getRegisterCode(const std::string& regName) {
@@ -230,34 +241,36 @@ uint16_t parseLiteralOrLabel(std::string str, bool pass2) {
         return parseLiteralOrLabel(str.substr(0, minusPos), pass2) - parseLiteralOrLabel(str.substr(minusPos + 1), pass2);
     }
 
-    std::string cleanStr;
-    for (char c : str)
-        if (c != '_') cleanStr += c;
-
-    std::string upperStr = toUpper(cleanStr);
+    std::string upperStr = toUpper(str);
 
     if (symbolTable.find(upperStr) != symbolTable.end()) {
         return symbolTable.at(upperStr);
     }
 
-    if (!upperStr.empty() && upperStr.back() == 'B' && upperStr.find("0X") == std::string::npos) {
+    std::string cleanStr;
+    for (char c : str)
+        if (c != '_') cleanStr += c;
+
+    std::string upperClean = toUpper(cleanStr);
+
+    if (!upperClean.empty() && upperClean.back() == 'B' && upperClean.find("0X") == std::string::npos) {
         try {
-            return static_cast<uint16_t>(std::stoul(upperStr.substr(0, upperStr.size() - 1), nullptr, 2));
+            return static_cast<uint16_t>(std::stoul(upperClean.substr(0, upperClean.size() - 1), nullptr, 2));
         } catch (...) {
         }
     }
-    if (upperStr.rfind("0B", 0) == 0) {
+    if (upperClean.rfind("0B", 0) == 0) {
         try {
-            return static_cast<uint16_t>(std::stoul(upperStr.substr(2), nullptr, 2));
+            return static_cast<uint16_t>(std::stoul(upperClean.substr(2), nullptr, 2));
         } catch (...) {
         }
     }
 
-    if (upperStr.rfind("0X", 0) == 0) {
-        return static_cast<uint16_t>(std::stoul(upperStr.substr(2), nullptr, 16));
+    if (upperClean.rfind("0X", 0) == 0) {
+        return static_cast<uint16_t>(std::stoul(upperClean.substr(2), nullptr, 16));
     }
-    if (!upperStr.empty() && upperStr.back() == 'H') {
-        return static_cast<uint16_t>(std::stoul(upperStr.substr(0, upperStr.size() - 1), nullptr, 16));
+    if (!upperClean.empty() && upperClean.back() == 'H') {
+        return static_cast<uint16_t>(std::stoul(upperClean.substr(0, upperClean.size() - 1), nullptr, 16));
     }
 
     try {
@@ -270,7 +283,6 @@ uint16_t parseLiteralOrLabel(std::string str, bool pass2) {
     }
 }
 
-// Parses memory expressions like [4 + 10 + R1] or [R4 + 3] or [R4]
 void parseBaseOffsetMem(std::string str, uint16_t& regCode, uint16_t& offsetVal, bool pass2) {
     str.erase(std::remove(str.begin(), str.end(), '['), str.end());
     str.erase(std::remove(str.begin(), str.end(), ']'), str.end());
@@ -424,6 +436,14 @@ int main(int argc, char* argv[]) {
                 std::string dataBody = cleanLine.substr(dwPos + 2);
                 std::vector<uint16_t> dwWords = parseDWLine(dataBody, false);
                 currentAddress += dwWords.size();
+            } else if (mnemonic == "JMP" || mnemonic == "JUMP") {
+                if (tokens.size() >= 2 && isRegister(tokens[1])) {
+                    currentAddress += 1;
+                } else {
+                    currentAddress += 2;
+                }
+            } else if (mnemonic == "CALL" || mnemonic == "CALL_R") {
+                currentAddress += 2;
             } else if (ISA.find(mnemonic) != ISA.end()) {
                 currentAddress += ISA.at(mnemonic).wordCount;
             } else {
@@ -472,7 +492,11 @@ int main(int argc, char* argv[]) {
                 try {
                     switch (spec.format) {
                         case FMT_NO_ARG:
-                            machineCode.push_back(buildWord(spec.opcode, 0, 0));
+                            if (spec.opcode == 0x35) {  // RET requires 1110 (SP) in SRC field
+                                machineCode.push_back(buildWord(spec.opcode, 0, 0x0E));
+                            } else {
+                                machineCode.push_back(buildWord(spec.opcode, 0, 0));
+                            }
                             break;
 
                         case FMT_SINGLE_DST:
@@ -545,6 +569,38 @@ int main(int argc, char* argv[]) {
                                 machineCode.push_back(buildWord(spec.opcode, dstReg, srcReg));
                                 machineCode.push_back(offsetVal);
                             }
+                            break;
+
+                        case FMT_JMP:
+                            if (tokens.size() < 2) throw std::invalid_argument("Missing target for JMP");
+                            if (isRegister(tokens[1])) {
+                                machineCode.push_back(buildWord(0x2C, 0, getRegisterCode(tokens[1])));
+                            } else {
+                                machineCode.push_back(buildWord(0x2B, 0, 0));
+                                machineCode.push_back(parseLiteralOrLabel(tokens[1], true));
+                            }
+                            break;
+
+                        case FMT_JMP_REG:
+                            if (tokens.size() < 2) throw std::invalid_argument("Missing register argument for JMP_R");
+                            machineCode.push_back(buildWord(0x2C, 0, getRegisterCode(tokens[1])));
+                            break;
+
+                        case FMT_CALL:
+                            if (tokens.size() < 2) throw std::invalid_argument("Missing target for CALL");
+                            if (isRegister(tokens[1])) {
+                                machineCode.push_back(buildWord(0x34, 0x0E, getRegisterCode(tokens[1])));
+                                machineCode.push_back(0x0000);
+                            } else {
+                                machineCode.push_back(buildWord(0x33, 0x0E, 0));
+                                machineCode.push_back(parseLiteralOrLabel(tokens[1], true));
+                            }
+                            break;
+
+                        case FMT_CALL_REG:
+                            if (tokens.size() < 2) throw std::invalid_argument("Missing register argument for CALL_R");
+                            machineCode.push_back(buildWord(0x34, 0x0E, getRegisterCode(tokens[1])));
+                            machineCode.push_back(0x0000);
                             break;
 
                         case FMT_JUMP_LABEL:
