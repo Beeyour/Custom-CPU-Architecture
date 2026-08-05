@@ -1,19 +1,19 @@
-; === EXECUTION START ===
-LOAD R0, [word1]
-MOVI R1, 1
-STOR [word2], R1
-MOVI R2, 0Fh
-STR [word2 + R0], R2
-LDR R3, [R0 + word2]
-MOVI SP, 100h
-PUSH R0
-PUSH R1
-POP R4
-POP R5
-POP R6
+// Test 3: Subroutine Call and Stack Return
+MOVI SP, 0x01FF    // Initialize Stack Pointer register
+MOVI R0, 0x0020
+PUSH R0            // Save initial value onto stack
+
+CALL MULTIPLY_BY_2 // Call subroutine at target label
+
+POP R1             // Restore original pushed value into R1
+CMPI R0, 0x0040    // Verify doubled output value (0x0020 * 2 = 0x0040)
+JNE FAIL_STACK
+HALT               // Pass: Execution completes successfully
+
+MULTIPLY_BY_2:
+ADD R0, R0         // Double value in R0
+RET                // Pop return PC from stack and return
+
+FAIL_STACK:
+MOVI R6, 0x1FFF    // Set failure flag
 HALT
-
-; === DATA SECTION ===
-
-word1: dw FFh, 1fh
-word2: dw 32, 1010b
