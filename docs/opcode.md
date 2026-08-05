@@ -8,26 +8,26 @@ This document details the hardware control signals, register bit encodings, and 
 
 The Control Unit outputs a 64-bit control line array (`C0` to `C63`) to orchestrate data movement across internal buses during execution steps.
 
-| Control Line Range | Target Module / Function | Description                                             |
-| :----------------- | :----------------------- | :------------------------------------------------------ |
-| **`C0`**           | **ROM**                  | Enable / Control Boot ROM Output                        |
-| **`C1` – `C4`**    | **RAM**                  | Read, Write, and Memory Enable signals                  |
-| **`C5`**           | **IR**                   | Instruction Register Load signal                        |
-| **`C6`**           | **Step Counter**         | Instruction Cycle Counter Reset / Step Control          |
-| **`C7` – `C9`**    | **IP (PC)**              | Instruction Pointer Increment, Load, and Enable signals |
-| **`C10` – `C11`**  | **MAR**                  | Memory Address Register Control                         |
-| **`C12`**          | **FLAGS**                | Update Status Flags (`Z`, `S`, `C`, `O`)                |
-| **`C13` – `C17`**  | **High Registers**       | Bus Control for High-byte / Primary Registers           |
-| **`C18` – `C22`**  | **Low Registers**        | Bus Control for Low-byte / Secondary Registers          |
-| **`C23`**          | **Select High ALU**      | Select High ALU Output / Routing Control                |
-| **`C24`**          | **Select Low ALU**       | Select Low ALU Output / Routing Control                 |
-| **`C25`**          | **ALU1 = 1**             | Set ALU Input 1 Constant (`alu1 = 1`)                   |
-| **`C26`**          | **ALU2 = 1**             | Set ALU Input 2 Constant (`alu2 = 1`)                   |
-| **`C27` – `C31`**  | _Reserved_               | Unassigned Control Lines                                |
-| **`C32` – `C35`**  | **ALU Select**           | 4-bit ALU Function Code Selector                        |
-| **`C36` – `C55`**  | _Reserved_               | Unassigned Control Lines                                |
-| **`C56` – `C59`**  | **Select High Register** | Target High Register Selection (Destination - 4 Bits)   |
-| **`C60` – `C63`**  | **Select Low Register**  | Target Low Register Selection (Source - 4 Bits)         |
+| Control Line Range            | Target Module / Function | Description                                             |
+| :---------------------------- | :----------------------- | :------------------------------------------------------ |
+| **`C0`**                      | **ROM**                  | Enable / Control Boot ROM Output                        |
+| **`C1` – `C4`**               | **RAM**                  | Read, Write, and Memory Enable signals                  |
+| **`C5`**                      | **IR**                   | Instruction Register Load signal                        |
+| **`C6`**                      | **Step Counter**         | Instruction Cycle Counter Reset / Step Control          |
+| **`C7` – `C9`, `C27`, `C29`** | **IP (PC)**              | Instruction Pointer Increment, Load, and Enable signals |
+| **`C10` – `C11`**             | **MAR**                  | Memory Address Register Control                         |
+| **`C12`, `C28`**              | **FLAGS**                | Update Status Flags (`Z`, `S`, `C`, `V`)                |
+| **`C13` – `C17`**             | **High Registers**       | Bus Control for High-byte / Primary Registers           |
+| **`C18` – `C22`**             | **Low Registers**        | Bus Control for Low-byte / Secondary Registers          |
+| **`C23`**                     | **Select High ALU**      | Select High ALU Output / Routing Control                |
+| **`C24`**                     | **Select Low ALU**       | Select Low ALU Output / Routing Control                 |
+| **`C25`**                     | **ALU1 = 1**             | Set ALU Input 1 Constant (`alu1 = 1`)                   |
+| **`C26`**                     | **ALU2 = 1**             | Set ALU Input 2 Constant (`alu2 = 1`)                   |
+| **`C30` – `C31`**             | _Reserved_               | Unassigned Control Lines                                |
+| **`C32` – `C35`**             | **ALU Select**           | 4-bit ALU Function Code Selector                        |
+| **`C36` – `C55`**             | _Reserved_               | Unassigned Control Lines                                |
+| **`C56` – `C59`**             | **Select High Register** | Target High Register Selection (Destination - 4 Bits)   |
+| **`C60` – `C63`**             | **Select Low Register**  | Target Low Register Selection (Source - 4 Bits)         |
 
 ---
 
@@ -72,7 +72,7 @@ This guide defines the standardized placeholders used across instruction syntax 
 | **`<SRC>`**           | 4 Bits  | Source register ID holding input data.                  | `ADD R0, R2`<br>_(Adds `R2` to `R0`, stores in `R0`)_           |
 | **`<REG>`**           | 4 Bits  | Target register for single-reg / loop ops.              | `LOOP R2, START`<br>_(Decrements `R2` & branches if `R2 != 0`)_ |
 | **`[<ADDR>]`**        | 16 Bits | Absolute RAM address. `[ ]` forces RAM access.          | `LOAD R0, [32F1h]`<br>_(Reads RAM at `0x32F1` into `R0`)_       |
-| **`[<REG> + <IMM>]`** |   Var   | Base Register + Offset Memory addressing.               | `LAD R0, [R2 + 5]` / `STR [R1 + 3], R2`                         |
+| **`[<REG> + <IMM>]`** |   Var   | Base Register + Offset Memory addressing.               | `LDR R0, [R2 + 5]` / `STR [R1 + 3], R2`                         |
 | **`<IMM16>`**         | 16 Bits | 16-bit literal loaded from 2nd instruction word.        | `MOVI R0, 00FFh`<br>_(Loads constant `0x00FF` into `R0`)_       |
 | **`<IMM4>`**          | 4 Bits  | 4-bit literal (`0–15` / `0h–Fh`) packed in `SRC` field. | `SHLI R0, Fh`<br>_(Shifts `R0` left by 15 (`0xF`) bits)_        |
 | **`<LABEL>`**         |   Var   | Code label resolved to jump address by assembler.       | `JZ PROCESS`<br>_(Jumps to `PROCESS` if Zero `Z = 1`)_          |
@@ -109,11 +109,11 @@ This guide defines the standardized placeholders used across instruction syntax 
     Opcode: 0x02 (0b000010)
     Syntax: STOR [<ADDR>], <SRC>
 
-#### 4. `LAD` — Load Register with Base + Offset Addressing
+#### 4. `LDR` — Load Register with Base + Offset Addressing
 
     Binary Pattern: [ xx [SRC] [DST] 000011 ]
     Opcode: 0x03 (0b000011)
-    Syntax: LAD <DST>, [<SRC> + <IMM16>]
+    Syntax: LDR <DST>, [<SRC> + <IMM16>]
 
 #### 5. `STR` — Store Register with Base + Offset Addressing
 
@@ -165,7 +165,7 @@ This guide defines the standardized placeholders used across instruction syntax 
 
 ---
 
-### Group 2: ALU & Comparison Operations (`0x0C` – `0x29`)
+### Group 2: ALU & Comparison Operations (`0x0C` – `0x2A`)
 
 #### 13. `ADD` — Register-to-Register Addition
 
@@ -341,124 +341,125 @@ This guide defines the standardized placeholders used across instruction syntax 
     Opcode: 0x28 (0b101000)
     Syntax: CMPI <DST>, <IMM16>
 
-#### 42. `TEST` — Bitwise Logical Compare
+#### 42. `TEST` — Bitwise Logical Compare Registers
 
     Binary Pattern: [ xx [SRC] [DST] 101001 ]
     Opcode: 0x29 (0b101001)
     Syntax: TEST <DST>, <SRC>
 
+#### 43. `TESTI` — Bitwise Logical Compare Immediate
+
+    Binary Pattern: [ xx xxxx [DST] 101010 ]
+    Opcode: 0x2A (0b101010)
+    Syntax: TESTI <DST>, <IMM16>
+
 ---
 
-### Group 3: Control Flow & Branching (`0x2A` – `0x37`)
+### Group 3: Control Flow & Branching (`0x2B` – `0x36`)
 
-#### 43. `JMP` — Unconditional Jump
-
-    Binary Pattern: [ xx xxxx xxxx 101010 ]
-    Opcode: 0x2A (0b101010)
-    Syntax: JMP <LABEL>
-
-#### 44. `JZ` / `JE` — Jump if Zero (Z = 1)
+#### 44. `JMP imm` (Logisim: `JUMP`) — Unconditional Immediate Jump
 
     Binary Pattern: [ xx xxxx xxxx 101011 ]
     Opcode: 0x2B (0b101011)
-    Syntax: JZ <LABEL>  /  JE <LABEL>
+    Syntax: JMP <LABEL>
 
-#### 45. `JNZ` / `JNE` — Jump if Not Zero (Z = 0)
+#### 45. `JMP reg` (Logisim: `JUMP_R`) — Register Indirect Jump
 
-    Binary Pattern: [ xx xxxx xxxx 101100 ]
+    Binary Pattern: [ xx [SRC] xxxx 101100 ]
     Opcode: 0x2C (0b101100)
-    Syntax: JNZ <LABEL>  /  JNE <LABEL>
+    Syntax: JMP <SRC>
 
-#### 46. `JC` — Jump if Carry (C = 1)
+#### 46. `JZ` / `JE` — Jump if Zero / Jump if Equal
 
     Binary Pattern: [ xx xxxx xxxx 101101 ]
     Opcode: 0x2D (0b101101)
-    Syntax: JC <LABEL>
+    Syntax: JZ <LABEL>  /  JE <LABEL>
 
-#### 47. `JNC` — Jump if Not Carry (C = 0)
+#### 47. `JNZ` / `JNE` — Jump if Not Zero / Jump if Not Equal
 
     Binary Pattern: [ xx xxxx xxxx 101110 ]
     Opcode: 0x2E (0b101110)
-    Syntax: JNC <LABEL>
+    Syntax: JNZ <LABEL>  /  JNE <LABEL>
 
-#### 48. `JS` — Jump if Sign (S = 1)
+#### 48. `JC` / `JB` — Jump if Carry / Unsigned Below
 
     Binary Pattern: [ xx xxxx xxxx 101111 ]
     Opcode: 0x2F (0b101111)
-    Syntax: JS <LABEL>
+    Syntax: JC <LABEL>  /  JB <LABEL>
 
-#### 49. `JNS` — Jump if Not Sign (S = 0)
+#### 49. `JNC` / `JAE` — Jump if No Carry / Unsigned Above or Equal
 
     Binary Pattern: [ xx xxxx xxxx 110000 ]
     Opcode: 0x30 (0b110000)
-    Syntax: JNS <LABEL>
+    Syntax: JNC <LABEL>  /  JAE <LABEL>
 
-#### 50. `JA` / `JG` — Jump if Greater / Above
+#### 50. `JG` — Jump if Signed Greater
 
     Binary Pattern: [ xx xxxx xxxx 110001 ]
     Opcode: 0x31 (0b110001)
-    Syntax: JA <LABEL>  /  JG <LABEL>
+    Syntax: JG <LABEL>
 
-#### 51. `REF` / `JL` — Jump if Less
+#### 51. `JL` — Jump if Signed Less
 
     Binary Pattern: [ xx xxxx xxxx 110010 ]
     Opcode: 0x32 (0b110010)
-    Syntax: REF <LABEL>  /  JL <LABEL>
+    Syntax: JL <LABEL>
 
-#### 52. `JAE` — Jump if Greater or Equal
+#### 52. `CALL imm` (Logisim: `CALL`) — Direct Subroutine Call
 
-    Binary Pattern: [ xx xxxx xxxx 110011 ]
+    Binary Pattern: [ xx xxxx 1110 110011 ]
     Opcode: 0x33 (0b110011)
-    Syntax: JAE <LABEL>
-
-#### 53. `JBE` — Jump if Less or Equal
-
-    Binary Pattern: [ xx xxxx xxxx 110100 ]
-    Opcode: 0x34 (0b110100)
-    Syntax: JBE <LABEL>
-
-#### 54. `CALL` — Call Subroutine
-
-    Binary Pattern: [ xx xxxx xxxx 110101 ]
-    Opcode: 0x35 (0b110101)
     Syntax: CALL <LABEL>
 
-#### 55. `RET` — Return from Subroutine
+#### 53. `CALL reg` (Logisim: `CALL_R`) — Register Indirect Subroutine Call
 
-    Binary Pattern: [ xx xxxx xxxx 110110 ]
-    Opcode: 0x36 (0b110110)
+    Binary Pattern: [ xx [SRC] 1110 110100 ]
+    Opcode: 0x34 (0b110100)
+    Syntax: CALL <SRC>
+
+#### 54. `RET` — Return from Subroutine
+
+    Binary Pattern: [ xx 1110 xxxx 110101 ]
+    Opcode: 0x35 (0b110101)
     Syntax: RET
 
-#### 56. `LOOP` — Decrement Register & Branch if Reg != 0
+#### 55. `LOOP` (Logisim: `LOOPP`) — Decrement Register & Branch if Reg != 0
 
-    Binary Pattern: [ xx xxxx [REG] 110111 ]
-    Opcode: 0x37 (0b110111)
+    Binary Pattern: [ xx xxxx [REG] 110110 ]
+    Opcode: 0x36 (0b110110)
     Syntax: LOOP <REG>, <LABEL>
 
 ---
 
-### Group 4: Flags & System Operations (`0x38` – `0x3B`)
+### Reserved Opcodes (`0x37` – `0x3B`)
 
-#### 57. `CLC` — Clear Carry Flag
+    Unallocated 6-bit Opcode Range: 0x37 – 0x3B (0b110111 – 0b111011)
+    Purpose: Reserved for future instruction expansion (5 free slots)
 
-    Binary Pattern: [ xx xxxx xxxx 111000 ]
-    Opcode: 0x38 (0b111000)
+---
+
+### Group 4: Flags & System Operations (`0x3C` – `0x3F`)
+
+#### 56. `CLC` — Clear Carry Flag
+
+    Binary Pattern: [ xx xxxx xxxx 111100 ]
+    Opcode: 0x3C (0b111100)
     Syntax: CLC
 
-#### 58. `STC` — Set Carry Flag
+#### 57. `STC` — Set Carry Flag
 
-    Binary Pattern: [ xx xxxx xxxx 111001 ]
-    Opcode: 0x39 (0b111001)
+    Binary Pattern: [ xx xxxx xxxx 111101 ]
+    Opcode: 0x3D (0b111101)
     Syntax: STC
 
-#### 59. `CLR` — Clear Register / Control Flags
+#### 58. `CLR` — Clear Register / Control Flags
 
-    Binary Pattern: [ xx xxxx [DST] 111010 ]
-    Opcode: 0x3A (0b111010)
+    Binary Pattern: [ xx xxxx [DST] 111110 ]
+    Opcode: 0x3E (0b111110)
     Syntax: CLR <DST>
 
-#### 60. `HALT` — Halt CPU Clock & Pipeline
+#### 59. `HALT` — Halt CPU Clock & Pipeline
 
-    Binary Pattern: [ xx xxxx xxxx 111011 ]
-    Opcode: 0x3B (0b111011)
+    Binary Pattern: [ xx xxxx xxxx 111111 ]
+    Opcode: 0x3F (0b111111)
     Syntax: HALT
