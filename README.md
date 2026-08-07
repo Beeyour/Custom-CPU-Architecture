@@ -5,6 +5,7 @@
 > - `/software/assembler/assembler.cpp`
 > - `/Makefile`
 > - `/README.md`
+> - `/programs/`
 > - `/package.json` & `/syntaxes/` (VS Code custom syntax extension)
 >
 > All AI-generated outputs and suggestions were thoroughly reviewed, audited, and verified to ensure complete technical accuracy with the hardware design.

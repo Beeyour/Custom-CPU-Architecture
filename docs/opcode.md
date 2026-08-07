@@ -23,7 +23,7 @@ The Control Unit outputs a 64-bit control line array (`C0` to `C63`) to orchestr
 | **`C24`**                     | **Select Low ALU**       | Select Low ALU Output / Routing Control                 |
 | **`C25`**                     | **ALU1 = 1**             | Set ALU Input 1 Constant (`alu1 = 1`)                   |
 | **`C26`**                     | **ALU2 = 1**             | Set ALU Input 2 Constant (`alu2 = 1`)                   |
-| **`C30`**                     | **selcet only ZF**       | for change only zeroflag for loop only **change**       |
+| **`C30`**                     | **select only ZF**       | Change only Zero Flag (used by `LOOP` instruction)      |
 | **`C31`**                     | _Reserved_               | Unassigned Control Lines                                |
 | **`C32` – `C35`**             | **ALU Select**           | 4-bit ALU Function Code Selector                        |
 | **`C36` – `C55`**             | _Reserved_               | Unassigned Control Lines                                |
@@ -464,3 +464,44 @@ This guide defines the standardized placeholders used across instruction syntax 
     Binary Pattern: [ xx xxxx xxxx 111111 ]
     Opcode: 0x3F (0b111111)
     Syntax: HALT
+
+---
+
+## 🗂️ 6. Assembly Program Structure & Data Segments
+
+For clean readability and proper assembler parsing, all custom assembly programs should be divided into **Code** and **Data** sections:
+
+### Section Organization Rules:
+
+1. **Code Section:** Contains executable instructions (`MOVI`, `CALL`, `HALT`, labels, and subroutines).
+2. **Data Section:** Placed at the end of the file. Contains constant values, arrays, and variables initialized with `dw` (Define Word).
+3. **Data Allocation Directive (`dw`):**
+    - Declares 16-bit raw data words directly in memory.
+    - Values can be formatted as hex (e.g., `52fh`, `0x052F`), decimal (e.g., `10`), or labels.
+    - Use a trailing label (e.g., `stop:`) right after array definitions to mark the memory endpoint.
+
+### Standard Template:
+
+```assembly
+// ============================================================================
+// Code section
+// ============================================================================
+
+mainCode:
+    MOVI SP, 0x1000       // Set Stack Pointer
+    MOVI R5, myArr        // Load start address of array
+    MOVI R6, stop         // Load end address of array
+    CALL processData
+    HALT
+
+processData:
+    ; Program logic goes here
+    RET
+
+// ============================================================================
+// Data section
+// ============================================================================
+
+myArr: dw 0x052F, 0xEEF3, 0x0052, 0x0062, 0x0425, 0x052F, 0x252E, 0x0042
+stop:
+```
