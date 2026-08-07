@@ -1,8 +1,8 @@
 > **AI Usage & Verification Disclaimer**
 > AI assistance was strictly limited to English language translation, document formatting, and code/toolchain structuring across the following files only:
 >
-> - `/docs/opcode.md`
-> - `/software/assembler/assembler.cpp`
+> - `/opcode.md`
+> - `/software/`
 > - `/Makefile`
 > - `/README.md`
 > - `/programs/`
@@ -13,6 +13,8 @@
 # 16-Bit Custom Processor Architecture
 
 A custom 16-bit RISC-like processor designed in **Logisim Evolution**, featuring a modular hardware architecture, dedicated boot logic, hardware status flags, and an extensible custom C++ toolchain.
+
+## ![16-Bit CPU Architecture](docs/logisim_image.png)
 
 ---
 

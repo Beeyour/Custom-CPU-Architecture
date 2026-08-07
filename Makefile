@@ -10,7 +10,6 @@ BIN = bin/assembler
 
 all: $(HEX)
 
-
 $(BIN): $(SRC)
 	@mkdir -p bin
 	$(CXX) $(CXXFLAGS) $(SRC) -o $(BIN)
