@@ -23,7 +23,8 @@ The Control Unit outputs a 64-bit control line array (`C0` to `C63`) to orchestr
 | **`C24`**                     | **Select Low ALU**       | Select Low ALU Output / Routing Control                 |
 | **`C25`**                     | **ALU1 = 1**             | Set ALU Input 1 Constant (`alu1 = 1`)                   |
 | **`C26`**                     | **ALU2 = 1**             | Set ALU Input 2 Constant (`alu2 = 1`)                   |
-| **`C30` – `C31`**             | _Reserved_               | Unassigned Control Lines                                |
+| **`C30`**                     | **selcet only ZF**       | for change only zeroflag for loop only **change**       |
+| **`C31`**                     | _Reserved_               | Unassigned Control Lines                                |
 | **`C32` – `C35`**             | **ALU Select**           | 4-bit ALU Function Code Selector                        |
 | **`C36` – `C55`**             | _Reserved_               | Unassigned Control Lines                                |
 | **`C56` – `C59`**             | **Select High Register** | Target High Register Selection (Destination - 4 Bits)   |
