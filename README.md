@@ -28,8 +28,8 @@ A custom 16-bit RISC-like processor designed in **Logisim Evolution**, featuring
     - [x] **Sign Flag (`S`):** Fully implemented.
     - [x] **Carry Flag (`C`):** Fully implemented.
     - [x] **Overflow Flag (`O` / `V`):** Fully implemented.
-- [🔄] **Control Unit & Micro-Operations:** Core opcode decoder established; micro-operation sequencing and control signals across execution units in active development.
-- [ ] **Control Flow & System Operations Unit:** Branching logic, hardware `LOOP`, subroutine call/return stack, and system control circuitry pending implementation.
+- [x] **Control Unit & Micro-Operations:** Opcode decoder established, micro-operation sequencing and control signals completed across all core execution units.
+- [x] **Control Flow & System Operations Unit:** Branching logic, hardware `LOOP`, subroutine call/return stack, and system control circuitry fully implemented.
 
 ### 2. Software Toolchain
 
@@ -50,29 +50,29 @@ A custom 16-bit RISC-like processor designed in **Logisim Evolution**, featuring
 
 ## 📜 Instruction Set Architecture (ISA) — Master Table
 
-| Status | Legend                      |
-| :----: | :-------------------------- |
-| `[✓]`  | Implemented in Hardware     |
-| `[ ]`  | Planned / Under Development |
+| Status | Legend                            |
+| :----: | :-------------------------------- |
+| `[✓]`  | Implemented in Hardware           |
+| `[ ]`  | Unimplemented / Excluded / Future |
 
 ---
 
 ### 1. Data Movement, Stack & I/O Group (`0x00` – `0x0B`)
 
-| Status | Opcode (Hex) | Instruction    | Description                                     |
-| :----: | :----------: | :------------- | :---------------------------------------------- |
-| `[✓]`  |    `0x00`    | `BOOT` / `NOP` | Pipeline initialization / No Operation          |
-| `[✓]`  |    `0x01`    | `LOAD`         | Read value from Direct RAM Address to Register  |
-| `[✓]`  |    `0x02`    | `STOR`         | Write value from Register to Direct RAM Address |
-| `[✓]`  |    `0x03`    | `LDR`          | Load Register with Base + Offset Addressing     |
-| `[✓]`  |    `0x04`    | `STR`          | Store Register with Base + Offset Addressing    |
-| `[✓]`  |    `0x05`    | `MOV`          | Copy value between Registers                    |
-| `[✓]`  |    `0x06`    | `MOVI`         | Load Immediate 16-bit value into Register       |
-| `[✓]`  |    `0x07`    | `PUSH`         | Push value onto Stack (Implicit `SP` Encoding)  |
-| `[✓]`  |    `0x08`    | `POP`          | Pop value from Stack (Implicit `SP` Encoding)   |
-| `[✓]`  |    `0x09`    | `XCHG`         | Exchange contents of two Registers              |
-| `[ ]`  |    `0x0A`    | `INN`          | Read data from Input Port                       |
-| `[ ]`  |    `0x0B`    | `OUTT`         | Write data to Output Port (Display)             |
+| Status | Opcode (Hex) | Instruction    | Description                                      |
+| :----: | :----------: | :------------- | :----------------------------------------------- |
+| `[ ]`  |    `0x00`    | `BOOT` / `NOP` | Pipeline initialization / No Operation (Omitted) |
+| `[✓]`  |    `0x01`    | `LOAD`         | Read value from Direct RAM Address to Register   |
+| `[✓]`  |    `0x02`    | `STOR`         | Write value from Register to Direct RAM Address  |
+| `[✓]`  |    `0x03`    | `LDR`          | Load Register with Base + Offset Addressing      |
+| `[✓]`  |    `0x04`    | `STR`          | Store Register with Base + Offset Addressing     |
+| `[✓]`  |    `0x05`    | `MOV`          | Copy value between Registers                     |
+| `[✓]`  |    `0x06`    | `MOVI`         | Load Immediate 16-bit value into Register        |
+| `[✓]`  |    `0x07`    | `PUSH`         | Push value onto Stack (Implicit `SP` Encoding)   |
+| `[✓]`  |    `0x08`    | `POP`          | Pop value from Stack (Implicit `SP` Encoding)    |
+| `[✓]`  |    `0x09`    | `XCHG`         | Exchange contents of two Registers               |
+| `[ ]`  |    `0x0A`    | `INN`          | Read data from Input Port (Unimplemented)        |
+| `[ ]`  |    `0x0B`    | `OUTT`         | Write data to Output Port (Unimplemented)        |
 
 ---
 
